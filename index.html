@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>🐍 بازی مار - بینهایت</title>
+    <title>🐍 Snake Game Mega Original 🐍</title>
     <link
       rel="shortcut icon"
       href="./favicon.ico"
@@ -18,7 +18,47 @@
     />
   </head>
   <body>
-    <div class="wrapper">
+    <!-- ===== TOAST ===== -->
+    <div
+      class="toast"
+      id="toast"
+    >
+      <span class="toast-icon">✅</span>
+      <span class="toast-text">پیام</span>
+    </div>
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div
+      class="loading-overlay"
+      id="loadingOverlay"
+    >
+      <div class="loading-snake">🐍</div>
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading...</div>
+    </div>
+
+    <div
+      class="countdown-overlay"
+      id="countdownOverlay"
+    >
+      <div
+        class="countdown-number"
+        id="countdownNumber"
+      >
+        3
+      </div>
+    </div>
+
+    <div
+      class="snow-container"
+      id="snowContainer"
+    ></div>
+
+    <div
+      class="wrapper"
+      id="mainWrapper"
+      style="display: none"
+    >
       <div
         class="overlay"
         id="overlay"
@@ -27,45 +67,57 @@
         class="sidebar"
         id="sidebar"
       >
-        <h3>📋 منو</h3>
+        <h3>📋 Menu</h3>
         <div
           class="sidebar-item active"
           data-target="section-name"
         >
-          <span class="icon">👤</span> اسم
+          <span class="icon">👤</span> <span data-i18n="name">Name</span>
+        </div>
+        <div
+          class="sidebar-item"
+          data-target="section-wheel"
+        >
+          <span class="icon">🎡</span> <span data-i18n="wheel">Wheel</span>
         </div>
         <div
           class="sidebar-item"
           data-target="section-color"
         >
-          <span class="icon">🎨</span> رنگ مار
+          <span class="icon">🎨</span> <span data-i18n="color">Color</span>
+        </div>
+        <div
+          class="sidebar-item"
+          data-target="section-bgcolor"
+        >
+          <span class="icon">🖼️</span> <span data-i18n="bgcolor">BG Color</span>
         </div>
         <div
           class="sidebar-item"
           data-target="section-hat"
         >
-          <span class="icon">🎩</span> فروشگاه کلاه
+          <span class="icon">🎩</span> <span data-i18n="hat">Hat</span>
+        </div>
+        <div
+          class="sidebar-item"
+          data-target="section-glasses"
+        >
+          <span class="icon">👓</span> <span data-i18n="glasses">Glasses</span>
         </div>
         <div
           class="sidebar-item"
           data-target="section-settings"
         >
-          <span class="icon">⚙️</span> تنظیمات
-        </div>
-        <div
-          class="sidebar-item"
-          data-target="section-music"
-        >
-          <span class="icon">🎵</span> موزیک
+          <span class="icon">⚙️</span>
+          <span data-i18n="settings">Settings</span>
         </div>
         <div
           class="sidebar-item"
           data-target="section-play"
         >
-          <span class="icon">▶</span> شروع
+          <span class="icon">▶</span> <span data-i18n="play">Play</span>
         </div>
       </div>
-
       <div
         class="container"
         id="mainContainer"
@@ -74,179 +126,311 @@
           class="sidebar-toggle"
           id="sidebarToggle"
         >
-          ☰ منو
+          ☰ Menu
         </button>
-
         <div id="menu">
-          <h1>🐍 Snake Game</h1>
+          <h1>🐍 Snake Game Mega Original 🐍</h1>
 
+          <!-- ===== CLOCK ===== -->
+          <div id="clock-container">
+            <span class="clock-icon">🕐</span>
+            <span
+              class="clock-time"
+              id="clockDisplay"
+              >00:00:00</span
+            >
+          </div>
+
+          <!-- ===== WHEEL OF FORTUNE ===== -->
           <div
-            class="menu-group"
-            id="section-name"
+            class="wheel-section"
+            id="section-wheel"
           >
-            <label>👤 اسم بازیکن</label>
-            <input
-              type="text"
-              id="nameInput"
-              placeholder="اسمت رو وارد کن..."
-              maxlength="15"
-            />
+            <div class="wheel-header">
+              <div class="title">
+                🎡 <span data-i18n="wheel">Wheel of Fortune</span>
+              </div>
+              <div
+                class="badge"
+                id="wheelSpinsBadge"
+              >
+                🔄 999 spins left
+              </div>
+              <button
+                class="wheel-toggle-btn"
+                id="wheelToggleBtn"
+              >
+                🔽 <span data-i18n="open">Open</span>
+              </button>
+            </div>
+            <div
+              class="wheel-content"
+              id="wheelContent"
+            >
+              <div class="wheel-wrapper">
+                <div class="wheel-pointer">▼</div>
+                <canvas
+                  id="wheelCanvas"
+                  width="600"
+                  height="600"
+                ></canvas>
+                <div class="wheel-center">🎯</div>
+              </div>
+              <div class="wheel-controls">
+                <button
+                  class="wheel-btn spin"
+                  id="spinWheelBtn"
+                >
+                  🎰 <span data-i18n="spin">Spin</span>
+                </button>
+                <button
+                  class="wheel-btn reset"
+                  id="resetWheelBtn"
+                >
+                  🔄 <span data-i18n="reset">Reset</span>
+                </button>
+              </div>
+              <div
+                class="wheel-result"
+                id="wheelResult"
+              >
+                💰 <span data-i18n="spin_to_win">Spin to win!</span>
+              </div>
+              <div class="wheel-stats">
+                <span>🎯 Spins: <span id="spinCount">0</span>/999</span>
+                <span>🏆 Total Won: <span id="totalWon">0</span> coins</span>
+              </div>
+              <div
+                class="wheel-history"
+                id="wheelHistory"
+              ></div>
+            </div>
           </div>
 
           <div
             class="menu-group"
+            style="border-color: rgba(255, 215, 0, 0.2)"
+          >
+            <label
+              >🌐 <span data-i18n="select_lang">Select Language</span></label
+            >
+            <div
+              class="lang-btn-group"
+              id="langGroup"
+            >
+              <button
+                class="lang-btn"
+                data-lang="fa"
+              >
+                🇮🇷 فارسی
+              </button>
+              <button
+                class="lang-btn"
+                data-lang="en"
+              >
+                🇺🇸 English
+              </button>
+              <button
+                class="lang-btn"
+                data-lang="ja"
+              >
+                🇯🇵 日本語
+              </button>
+              <button
+                class="lang-btn"
+                data-lang="ko"
+              >
+                🇰🇷 한국어
+              </button>
+              <button
+                class="lang-btn"
+                data-lang="zh"
+              >
+                🇨🇳 中文
+              </button>
+            </div>
+          </div>
+          <div
+            class="menu-group"
+            id="section-name"
+          >
+            <label>👤 <span data-i18n="player_name">Player Name</span></label>
+            <input
+              type="text"
+              id="nameInput"
+              placeholder="Enter your name..."
+              maxlength="15"
+            />
+          </div>
+          <div
+            class="menu-group"
             id="section-color"
           >
-            <label>🎨 رنگ مار</label>
+            <label>🎨 <span data-i18n="snake_color">Snake Color</span></label>
             <div
               class="color-picker"
               id="colorPicker"
             ></div>
           </div>
-
-          <!-- ===== فروشگاه کلاه (همه رایگان) ===== -->
+          <div
+            class="menu-group"
+            id="section-bgcolor"
+          >
+            <label
+              >🖼️ <span data-i18n="bgcolor_title">Background Color</span></label
+            >
+            <div
+              class="bg-color-picker"
+              id="bgColorPicker"
+            ></div>
+          </div>
           <div
             class="menu-group"
             id="section-hat"
           >
-            <label>🎩 فروشگاه کلاه</label>
+            <label>🎩 <span data-i18n="hat_shop">Hat Shop</span></label>
             <div
-              class="hat-shop"
+              class="shop-grid"
               id="hatShop"
             ></div>
-            <div
-              style="
-                margin-top: 10px;
-                color: rgba(255, 255, 255, 0.5);
-                font-size: 0.8rem;
-              "
-            >
-              💵 سکه‌های شما:
-              <span
-                id="totalCoinsDisplay"
-                style="color: #ffd700; font-weight: 700"
-                >∞</span
-              >
-              <span class="infinite-badge">بینهایت</span>
-            </div>
           </div>
-
+          <div
+            class="menu-group"
+            id="section-glasses"
+          >
+            <label>👓 <span data-i18n="glasses_shop">Glasses Shop</span></label>
+            <div
+              class="shop-grid"
+              id="glassesShop"
+            ></div>
+          </div>
+          <div
+            style="
+              margin: 6px 0 12px;
+              color: rgba(255, 255, 255, 0.6);
+              font-size: 0.9rem;
+              text-align: center;
+            "
+          >
+            💰 <span data-i18n="your_coins">Your Coins</span>:
+            <span
+              id="totalCoinsDisplay"
+              style="color: #ffd700; font-weight: 700"
+              >0</span
+            >
+          </div>
           <div
             class="menu-group"
             id="section-settings"
           >
-            <label>⚙️ تنظیمات</label>
+            <label>⚙️ <span data-i18n="settings_title">Settings</span></label>
             <div class="setting-row">
               <div class="setting-item">
-                <label>سرعت اولیه</label>
+                <label data-i18n="speed">Speed</label>
                 <select id="speedSelect">
-                  <option value="200">آسان</option>
+                  <option
+                    value="200"
+                    data-i18n="easy"
+                  >
+                    Easy
+                  </option>
                   <option
                     value="140"
                     selected
+                    data-i18n="medium"
                   >
-                    متوسط
+                    Medium
                   </option>
-                  <option value="80">سخت</option>
+                  <option
+                    value="80"
+                    data-i18n="hard"
+                  >
+                    Hard
+                  </option>
                 </select>
               </div>
               <div class="setting-item">
-                <label>اندازه</label>
+                <label data-i18n="size">Size</label>
                 <select id="sizeSelect">
-                  <option value="15">کوچک</option>
+                  <option
+                    value="15"
+                    data-i18n="small"
+                  >
+                    Small
+                  </option>
                   <option
                     value="20"
                     selected
+                    data-i18n="medium"
                   >
-                    متوسط
+                    Medium
                   </option>
-                  <option value="25">بزرگ</option>
+                  <option
+                    value="25"
+                    data-i18n="large"
+                  >
+                    Large
+                  </option>
                 </select>
               </div>
               <div class="setting-item">
-                <label>غذا</label>
+                <label data-i18n="food_count">Food</label>
                 <select id="foodCountSelect">
-                  <option value="1">۱</option>
+                  <option value="1">1</option>
                   <option
                     value="3"
                     selected
                   >
-                    ۳
+                    3
                   </option>
-                  <option value="5">۵</option>
+                  <option value="5">5</option>
                 </select>
               </div>
             </div>
           </div>
-
-          <div
-            class="menu-group"
-            id="section-music"
-          >
-            <label>🎵 موزیک</label>
-            <div class="music-upload">
-              <input
-                type="file"
-                id="musicInput"
-                accept="audio/*"
-              />
-              <label for="musicInput">📁 انتخاب فایل</label>
-              <span
-                class="music-status no-music"
-                id="musicStatus"
-                >❌ بدون موزیک</span
-              >
-            </div>
-          </div>
-
           <div
             class="menu-group"
             id="section-play"
           >
-            <button id="playBtn">▶ شروع بازی</button>
+            <button id="playBtn">
+              ▶ <span data-i18n="start_game">Start Game</span>
+            </button>
           </div>
         </div>
-
         <div id="gameScreen">
-          <!-- ===== نمایش سکه و قلب در بالای صفحه ===== -->
           <div
             class="top-stats"
             id="topStats"
           >
             <div class="stat-item">
-              <span class="emoji">👤</span>
-              <span id="playerNameDisplay">بازیکن</span>
+              <span class="emoji">👤</span
+              ><span id="playerNameDisplay">Player</span>
             </div>
             <div class="stat-item">
-              <span class="emoji">💵</span>
-              <span
-                class="value coins"
+              <span class="emoji">💰</span
+              ><span
+                class="value"
                 id="scoreDisplay"
-                >∞</span
+                >0</span
               >
-              <span class="infinite-badge">بینهایت</span>
             </div>
             <div class="stat-item">
-              <span class="emoji">🍎</span>
-              <span id="foodCountDisplay">0</span>
+              <span class="emoji">🍎</span><span id="foodCountDisplay">0</span>
             </div>
             <div class="stat-item">
-              <span class="emoji">❤️</span>
-              <span
+              <span class="emoji">❤️</span
+              ><span
                 class="hearts"
                 id="heartsDisplay"
+                ><span class="heart">❤️</span><span class="heart">❤️</span
+                ><span class="heart">❤️</span></span
               >
-                <span class="heart">❤️</span>
-                <span class="heart">❤️</span>
-                <span class="heart">❤️</span>
-              </span>
-              <span class="infinite-badge">بینهایت</span>
             </div>
             <div class="stat-item">
               <span
                 id="portalStatus"
                 style="color: #a29bfe; font-weight: 700"
-                >🚪 پورتال: ❌</span
+                >🚪 Portal: ❌</span
               >
             </div>
             <div class="stat-item">
@@ -256,30 +440,60 @@
                 >🚫</span
               >
             </div>
+            <div class="stat-item">
+              <span
+                id="glassesDisplay"
+                style="font-size: 1.2rem"
+                >🚫</span
+              >
+            </div>
           </div>
-
           <canvas
             id="gameCanvas"
             width="800"
             height="800"
           ></canvas>
 
+          <div class="game-controls">
+            <button
+              class="btn-pause"
+              id="pauseBtn"
+            >
+              ⏸ <span data-i18n="pause_btn">Pause</span>
+            </button>
+            <button
+              class="btn-resume hidden"
+              id="resumeBtn"
+            >
+              ▶️ <span data-i18n="resume_btn">Resume</span>
+            </button>
+            <button
+              class="btn-back"
+              id="backMenuBtn"
+            >
+              🏠 <span data-i18n="back_menu">Back to Menu</span>
+            </button>
+          </div>
+
           <div class="music-controls">
-            <button id="playMusicBtn">▶ پخش</button>
-            <button id="pauseMusicBtn">⏸ توقف</button>
+            <button id="playMusicBtn">
+              ▶ <span data-i18n="play">Play</span>
+            </button>
+            <button id="pauseMusicBtn">
+              ⏸ <span data-i18n="pause">Pause</span>
+            </button>
             <input
               type="range"
               class="volume-slider"
               id="volumeSlider"
               min="0"
               max="100"
-              value="70"
+              value="50"
             />
             <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.8rem"
               >🔊</span
             >
           </div>
-
           <div class="controls-wrapper">
             <div class="controls">
               <div class="ctrl-btn empty"></div>
@@ -287,40 +501,42 @@
                 class="ctrl-btn"
                 id="btnUp"
               >
-                ⬆
+                ⬆️
               </div>
               <div class="ctrl-btn empty"></div>
               <div
                 class="ctrl-btn"
                 id="btnLeft"
               >
-                ⬅
+                ⬅️
               </div>
               <div
                 class="ctrl-btn"
                 id="btnDown"
               >
-                ⬇
+                ⬇️
               </div>
               <div
                 class="ctrl-btn"
                 id="btnRight"
               >
-                ➡
+                ➡️
               </div>
             </div>
             <button
               class="speed-btn"
               id="speedBtn"
             >
-              🚀
-              <span class="speed-label"
-                >سرعت: <span id="speedLabel">متوسط</span></span
+              🚀<span class="speed-label"
+                ><span data-i18n="speed">Speed</span>:
+                <span id="speedLabel">Medium</span></span
               >
+            </button>
+            <button id="restartGameBtn">
+              🔄 <span data-i18n="restart">Restart</span>
             </button>
           </div>
         </div>
-
         <div id="gameOver">
           <span
             class="icon"
@@ -329,11 +545,14 @@
           >
           <h2 id="resultTitle">Game Over</h2>
           <div class="final-score">
-            💵 سکه‌های جمع‌آوری‌شده: <span id="finalScore">∞</span>
+            💰 <span data-i18n="coins_collected">Coins Collected</span>:
+            <span id="finalScore">0</span>
           </div>
           <div class="btn-group">
-            <button id="restartBtn">🔄 دوباره</button>
-            <button id="menuBtn">🏠 منو</button>
+            <button id="restartBtn">
+              🔄 <span data-i18n="restart">Restart</span>
+            </button>
+            <button id="menuBtn">🏠 <span data-i18n="menu">Menu</span></button>
           </div>
         </div>
       </div>

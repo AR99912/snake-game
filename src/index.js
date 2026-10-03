@@ -1,208 +1,726 @@
-// ===== منوی کناری =====
+// ============================================================
+//  BACKGROUND MUSIC - آرامش‌بخش
+// ============================================================
+const bgMusic = new Audio(
+  "https://archive.org/download/once-again/once-again.mp3",
+);
+bgMusic.loop = true;
+bgMusic.volume = 0.5;
+let musicLoaded = false;
+
+bgMusic.addEventListener("canplaythrough", () => {
+  musicLoaded = true;
+  console.log("🎵 Music loaded!");
+});
+
+bgMusic.addEventListener("error", (e) => {
+  console.log("⚠️ Music load error, using fallback...");
+  bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+  bgMusic.load();
+});
+
+document.getElementById("playMusicBtn").addEventListener("click", () => {
+  bgMusic.play().catch(() => {
+    setTimeout(() => bgMusic.play().catch(() => {}), 500);
+  });
+});
+document
+  .getElementById("pauseMusicBtn")
+  .addEventListener("click", () => bgMusic.pause());
+document.getElementById("volumeSlider").addEventListener("input", function () {
+  bgMusic.volume = this.value / 100;
+});
+
+function playMusicIfLoaded() {
+  if (musicLoaded) {
+    bgMusic.play().catch(() => {});
+  } else {
+    bgMusic.addEventListener(
+      "canplaythrough",
+      () => {
+        bgMusic.play().catch(() => {});
+      },
+      { once: true },
+    );
+  }
+}
+
+// ============================================================
+//  CLOCK FUNCTION
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  document.getElementById("clockDisplay").textContent =
+    hours + ":" + minutes + ":" + seconds;
+
+  const icon = document.querySelector(".clock-icon");
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const emojis = [
+    "🕛",
+    "🕐",
+    "🕑",
+    "🕒",
+    "🕓",
+    "🕔",
+    "🕕",
+    "🕖",
+    "🕗",
+    "🕘",
+    "🕙",
+    "🕚",
+  ];
+  const index = h % 12;
+  const minuteSlot = Math.floor(m / 5);
+  const emojiIndex = (index + minuteSlot) % 12;
+  icon.textContent = emojis[emojiIndex];
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+//  TOAST NOTIFICATION
+// ============================================================
+let toastTimeout = null;
+function showToast(message, type = "success") {
+  const toast = document.getElementById("toast");
+  const icon = toast.querySelector(".toast-icon");
+  const text = toast.querySelector(".toast-text");
+  if (toastTimeout) clearTimeout(toastTimeout);
+  icon.textContent = type === "success" ? "✅" : "❌";
+  text.textContent = message;
+  toast.className = "toast " + type;
+  void toast.offsetWidth;
+  toast.classList.add("show");
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+// ============================================================
+//  PAGE LOADING
+// ============================================================
+window.addEventListener("load", function () {
+  setTimeout(function () {
+    document.getElementById("loadingOverlay").classList.add("hidden");
+    document.getElementById("mainWrapper").style.display = "flex";
+  }, 2000);
+});
+
+// ============================================================
+//  COUNTDOWN
+// ============================================================
+function showCountdown(callback) {
+  const overlay = document.getElementById("countdownOverlay");
+  const numberEl = document.getElementById("countdownNumber");
+  overlay.classList.add("visible");
+  let count = 3;
+  numberEl.textContent = count;
+  numberEl.style.animation = "none";
+  setTimeout(() => {
+    numberEl.style.animation = "countPulse 0.8s ease-in-out";
+  }, 10);
+
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      numberEl.textContent = count;
+      numberEl.style.animation = "none";
+      setTimeout(() => {
+        numberEl.style.animation = "countPulse 0.8s ease-in-out";
+      }, 10);
+    } else {
+      clearInterval(interval);
+      numberEl.textContent = "GO!";
+      numberEl.className = "countdown-go";
+      numberEl.style.animation = "goPulse 0.5s ease-in-out";
+      setTimeout(() => {
+        overlay.classList.remove("visible");
+        numberEl.className = "countdown-number";
+        if (callback) callback();
+      }, 700);
+    }
+  }, 800);
+}
+
+// ============================================================
+//  SNOW
+// ============================================================
+const snakeEmojis = ["🐍", "🐉", "🦎", "🐊", "🐲"];
+function createSnowflakes() {
+  const container = document.getElementById("snowContainer");
+  container.innerHTML = "";
+  const count = window.innerWidth < 500 ? 20 : 40;
+  for (let i = 0; i < count; i++) {
+    const flake = document.createElement("div");
+    flake.className = "snowflake";
+    flake.textContent =
+      snakeEmojis[Math.floor(Math.random() * snakeEmojis.length)];
+    flake.style.left = Math.random() * 100 + "%";
+    const size = 18 + Math.random() * 28;
+    flake.style.fontSize = size + "px";
+    flake.style.animationDuration = 6 + Math.random() * 12 + "s";
+    flake.style.animationDelay = Math.random() * 15 + "s";
+    flake.style.opacity = 0.3 + Math.random() * 0.6;
+    container.appendChild(flake);
+  }
+}
+setTimeout(createSnowflakes, 100);
+let resizeTimer;
+window.addEventListener("resize", function () {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(createSnowflakes, 300);
+});
+
+// ============================================================
+//  LANGUAGE SYSTEM
+// ============================================================
+const LANGUAGES = {
+  fa: {
+    name: "نام",
+    color: "رنگ",
+    hat: "کلاه",
+    glasses: "عینک",
+    settings: "تنظیمات",
+    music: "موسیقی",
+    play: "بازی",
+    select_lang: "انتخاب زبان",
+    player_name: "اسم بازیکن",
+    snake_color: "رنگ مار",
+    hat_shop: "فروشگاه کلاه",
+    glasses_shop: "فروشگاه عینک",
+    your_coins: "سکه‌های شما",
+    settings_title: "تنظیمات",
+    speed: "سرعت",
+    size: "اندازه",
+    food_count: "تعداد غذا",
+    easy: "آسان",
+    medium: "متوسط",
+    hard: "سخت",
+    small: "کوچک",
+    large: "بزرگ",
+    music_title: "موسیقی",
+    start_game: "شروع بازی",
+    restart: "دوباره",
+    menu: "منو",
+    pause: "توقف",
+    coins_collected: "سکه‌های جمع‌آوری شده",
+    portal_active: "پورتال: ✅ فعال",
+    portal_inactive: "پورتال: ❌ غیرفعال",
+    game_over: "بازی تمام شد",
+    you_won: "🎉 برنده شدی! 🎉",
+    speed_levels: ["آسان", "متوسط", "سخت", "خیلی سخت"],
+    hat_names: {
+      none: "هیچ",
+      crown: "تاج",
+      tophat: "کلاه رسمی",
+      cap: "کلاه بیسبال",
+      graduation: "فارغ‌التحصیلی",
+      summer: "کلاه تابستانی",
+      helmet: "کلاه ایمنی",
+    },
+    glasses_names: {
+      none_g: "هیچ",
+      sunglasses: "عینک آفتابی",
+      reading: "مطالعه",
+      swim: "عینک شنا",
+    },
+    status_equipped: "✅ فعال",
+    status_owned: "✔️ دارم",
+    status_locked: "🔒 قفل",
+    free: "رایگان",
+    food_emojis: ["🍔", "🥙", "🥗", "🍳", "🥪", "🌭", "🍕"],
+    bgcolor_title: "رنگ پس‌زمینه",
+    pause_btn: "توقف",
+    resume_btn: "ادامه",
+    back_menu: "برگشت به منو",
+    wheel: "چرخ شانس",
+    spin: "بچرخان",
+    reset: "ریست",
+    open: "باز کردن",
+    close: "بستن",
+    spin_to_win: "برای برنده شدن بچرخان!",
+    spinning: "در حال چرخش...",
+  },
+  en: {
+    name: "Name",
+    color: "Color",
+    hat: "Hat",
+    glasses: "Glasses",
+    settings: "Settings",
+    music: "Music",
+    play: "Play",
+    select_lang: "Select Language",
+    player_name: "Player Name",
+    snake_color: "Snake Color",
+    hat_shop: "Hat Shop",
+    glasses_shop: "Glasses Shop",
+    your_coins: "Your Coins",
+    settings_title: "Settings",
+    speed: "Speed",
+    size: "Size",
+    food_count: "Food",
+    easy: "Easy",
+    medium: "Medium",
+    hard: "Hard",
+    small: "Small",
+    large: "Large",
+    music_title: "Music",
+    start_game: "Start Game",
+    restart: "Restart",
+    menu: "Menu",
+    pause: "Pause",
+    coins_collected: "Coins Collected",
+    portal_active: "Portal: ✅ Active",
+    portal_inactive: "Portal: ❌ Inactive",
+    game_over: "Game Over",
+    you_won: "🎉 You Won! 🎉",
+    speed_levels: ["Easy", "Medium", "Hard", "Very Hard"],
+    hat_names: {
+      none: "None",
+      crown: "Crown",
+      tophat: "Top Hat",
+      cap: "Cap",
+      graduation: "Graduation",
+      summer: "Summer Hat",
+      helmet: "Helmet",
+    },
+    glasses_names: {
+      none_g: "None",
+      sunglasses: "Sunglasses",
+      reading: "Reading",
+      swim: "Swim Goggles",
+    },
+    status_equipped: "✅ Active",
+    status_owned: "✔️ Owned",
+    status_locked: "🔒 Locked",
+    free: "Free",
+    food_emojis: ["🥞", "🧇", "🧀", "🥐", "🥨", "🥓", "🌮", "🍟"],
+    bgcolor_title: "Background Color",
+    pause_btn: "Pause",
+    resume_btn: "Resume",
+    back_menu: "Back to Menu",
+    wheel: "Wheel of Fortune",
+    spin: "Spin",
+    reset: "Reset",
+    open: "Open",
+    close: "Close",
+    spin_to_win: "Spin to win!",
+    spinning: "Spinning...",
+  },
+  ja: {
+    name: "名前",
+    color: "色",
+    hat: "帽子",
+    glasses: "メガネ",
+    settings: "設定",
+    music: "音楽",
+    play: "プレイ",
+    select_lang: "言語選択",
+    player_name: "プレイヤー名",
+    snake_color: "ヘビの色",
+    hat_shop: "帽子ショップ",
+    glasses_shop: "メガネショップ",
+    your_coins: "コイン",
+    settings_title: "設定",
+    speed: "速度",
+    size: "サイズ",
+    food_count: "食べ物",
+    easy: "簡単",
+    medium: "普通",
+    hard: "難しい",
+    small: "小",
+    large: "大",
+    music_title: "音楽",
+    start_game: "ゲーム開始",
+    restart: "再開",
+    menu: "メニュー",
+    pause: "一時停止",
+    coins_collected: "獲得コイン",
+    portal_active: "ポータル: ✅ アクティブ",
+    portal_inactive: "ポータル: ❌ 非アクティブ",
+    game_over: "ゲームオーバー",
+    you_won: "🎉 勝利！ 🎉",
+    speed_levels: ["簡単", "普通", "難しい", "非常に難しい"],
+    hat_names: {
+      none: "なし",
+      crown: "王冠",
+      tophat: "シルクハット",
+      cap: "キャップ",
+      graduation: "卒業帽",
+      summer: "サマーハット",
+      helmet: "ヘルメット",
+    },
+    glasses_names: {
+      none_g: "なし",
+      sunglasses: "サングラス",
+      reading: "読書用",
+      swim: "スイミングゴーグル",
+    },
+    status_equipped: "✅ 装備中",
+    status_owned: "✔️ 所有",
+    status_locked: "🔒 ロック",
+    free: "無料",
+    food_emojis: ["🍠", "🍱", "🍲", "🍥", "🍤", "🍢", "🍘", "🍙"],
+    bgcolor_title: "背景色",
+    pause_btn: "一時停止",
+    resume_btn: "再開",
+    back_menu: "メニューに戻る",
+    wheel: "運命のホイール",
+    spin: "回す",
+    reset: "リセット",
+    open: "開く",
+    close: "閉じる",
+    spin_to_win: "回して勝つ！",
+    spinning: "回転中...",
+  },
+  ko: {
+    name: "이름",
+    color: "색상",
+    hat: "모자",
+    glasses: "안경",
+    settings: "설정",
+    music: "음악",
+    play: "게임",
+    select_lang: "언어 선택",
+    player_name: "플레이어 이름",
+    snake_color: "뱀 색상",
+    hat_shop: "모자 상점",
+    glasses_shop: "안경 상점",
+    your_coins: "코인",
+    settings_title: "설정",
+    speed: "속도",
+    size: "크기",
+    food_count: "음식",
+    easy: "쉬움",
+    medium: "보통",
+    hard: "어려움",
+    small: "작음",
+    large: "큼",
+    music_title: "음악",
+    start_game: "게임 시작",
+    restart: "재시작",
+    menu: "메뉴",
+    pause: "일시정지",
+    coins_collected: "획득 코인",
+    portal_active: "포털: ✅ 활성화",
+    portal_inactive: "포털: ❌ 비활성화",
+    game_over: "게임 오버",
+    you_won: "🎉 승리! 🎉",
+    speed_levels: ["쉬움", "보통", "어려움", "매우 어려움"],
+    hat_names: {
+      none: "없음",
+      crown: "왕관",
+      tophat: "실크햇",
+      cap: "캡",
+      graduation: "졸업모자",
+      summer: "여름 모자",
+      helmet: "헬멧",
+    },
+    glasses_names: {
+      none_g: "없음",
+      sunglasses: "선글라스",
+      reading: "독서용",
+      swim: "수경",
+    },
+    status_equipped: "✅ 장착 중",
+    status_owned: "✔️ 보유",
+    status_locked: "🔒 잠김",
+    free: "무료",
+    food_emojis: ["🥘", "🫕", "🥣", "🧆", "🍧", "🦑", "🫖", "🍣", "🍢"],
+    bgcolor_title: "배경색",
+    pause_btn: "일시정지",
+    resume_btn: "계속",
+    back_menu: "메뉴로 돌아가기",
+    wheel: "행운의 바퀴",
+    spin: "돌리기",
+    reset: "초기화",
+    open: "열기",
+    close: "닫기",
+    spin_to_win: "돌려서 승리하세요!",
+    spinning: "돌아가는 중...",
+  },
+  zh: {
+    name: "名字",
+    color: "颜色",
+    hat: "帽子",
+    glasses: "眼镜",
+    settings: "设置",
+    music: "音乐",
+    play: "游戏",
+    select_lang: "选择语言",
+    player_name: "玩家名称",
+    snake_color: "蛇的颜色",
+    hat_shop: "帽子店",
+    glasses_shop: "眼镜店",
+    your_coins: "你的金币",
+    settings_title: "设置",
+    speed: "速度",
+    size: "大小",
+    food_count: "食物数量",
+    easy: "简单",
+    medium: "中等",
+    hard: "困难",
+    small: "小",
+    large: "大",
+    music_title: "音乐",
+    start_game: "开始游戏",
+    restart: "重新开始",
+    menu: "菜单",
+    pause: "暂停",
+    coins_collected: "收集的金币",
+    portal_active: "传送门: ✅ 激活",
+    portal_inactive: "传送门: ❌ 未激活",
+    game_over: "游戏结束",
+    you_won: "🎉 你赢了! 🎉",
+    speed_levels: ["简单", "中等", "困难", "非常困难"],
+    hat_names: {
+      none: "无",
+      crown: "王冠",
+      tophat: "礼帽",
+      cap: "棒球帽",
+      graduation: "毕业帽",
+      summer: "太阳帽",
+      helmet: "头盔",
+    },
+    glasses_names: {
+      none_g: "无",
+      sunglasses: "太阳镜",
+      reading: "阅读眼镜",
+      swim: "泳镜",
+    },
+    status_equipped: "✅ 已装备",
+    status_owned: "✔️ 已拥有",
+    status_locked: "🔒 已锁定",
+    free: "免费",
+    food_emojis: ["🦐", "🦞", "🍤", "🍜", "🍝", "🍚", "🌯", "🫔", "🍙", "🥫"],
+    bgcolor_title: "背景颜色",
+    pause_btn: "暂停",
+    resume_btn: "继续",
+    back_menu: "返回菜单",
+    wheel: "幸运轮盘",
+    spin: "旋转",
+    reset: "重置",
+    open: "打开",
+    close: "关闭",
+    spin_to_win: "旋转赢大奖！",
+    spinning: "旋转中...",
+  },
+};
+
+let currentLang = "fa";
+function t(key) {
+  const langData = LANGUAGES[currentLang] || LANGUAGES.en;
+  return langData[key] || key;
+}
+function getFoodEmojis() {
+  return LANGUAGES[currentLang].food_emojis || ["🍎"];
+}
+function getHatName(id) {
+  return t("hat_names")[id] || id;
+}
+function getGlassesName(id) {
+  return t("glasses_names")[id] || id;
+}
+function getSpeedLabel(index) {
+  return t("speed_levels")[index] || "Medium";
+}
+
+function updateAllTexts() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.dataset.i18n;
+    const text = t(key);
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA")
+      el.placeholder = text;
+    else el.textContent = text;
+  });
+  renderAllShops();
+  updateSpeedDisplay();
+  updatePortalStatus();
+  updateHatDisplay();
+  updateGlassesDisplay();
+  if (state.won) resultTitle.textContent = t("you_won");
+  else if (state.gameOver) resultTitle.textContent = t("game_over");
+  speedLabel.textContent = getSpeedLabel(currentSpeedIndex);
+  document
+    .querySelectorAll("select option[data-i18n]")
+    .forEach((opt) => (opt.textContent = t(opt.dataset.i18n)));
+
+  // به‌روزرسانی دکمه چرخ با تغییرات جدید
+  updateSpinButtonState();
+  wheelToggleBtn.innerHTML = wheelOpen
+    ? '🔼 <span data-i18n="close">Close</span>'
+    : '🔽 <span data-i18n="open">Open</span>';
+}
+document.querySelectorAll(".lang-btn").forEach((btn) => {
+  btn.addEventListener("click", function () {
+    document
+      .querySelectorAll(".lang-btn")
+      .forEach((b) => b.classList.remove("active"));
+    this.classList.add("active");
+    currentLang = this.dataset.lang;
+    updateAllTexts();
+    renderAllShops();
+    updateAllDisplays();
+    saveProgress();
+    drawGame();
+  });
+});
+document.querySelector('.lang-btn[data-lang="fa"]')?.classList.add("active");
+
+// ===== CONSTANTS =====
+const ALL_COLORS = [
+  { name: "Red", code: "#e74c3c" },
+  { name: "Orange", code: "#e67e22" },
+  { name: "Yellow", code: "#f1c40f" },
+  { name: "Green", code: "#2ecc71" },
+  { name: "Blue", code: "#3498db" },
+  { name: "Purple", code: "#9b59b6" },
+  { name: "Pink", code: "#fd79a8" },
+  { name: "Brown", code: "#8B6914" },
+  { name: "White", code: "#ecf0f1" },
+  { name: "Black", code: "#2c3e50" },
+  { name: "Rainbow", code: "rainbow" },
+];
+
+const BG_COLORS = [
+  { name: "Dark", code: "#1a1a2e" },
+  { name: "Black", code: "#000000" },
+  { name: "Navy", code: "#0a0a2a" },
+  { name: "Dark Green", code: "#0a1f0a" },
+  { name: "Dark Purple", code: "#1a0a2a" },
+  { name: "Gray", code: "#2a2a2a" },
+  { name: "Dark Blue", code: "#0a1a3a" },
+  { name: "Charcoal", code: "#1a1a1a" },
+];
+
+let selectedColor = ALL_COLORS[0];
+let selectedBgColor = BG_COLORS[0];
+
+const HAT_SHOP = [
+  {
+    id: "none",
+    emoji: "🚫",
+    name: "hat_names.none",
+    price: 0,
+    default: true,
+    category: "hat",
+  },
+  {
+    id: "crown",
+    emoji: "👑",
+    name: "hat_names.crown",
+    price: 500,
+    category: "hat",
+  },
+  {
+    id: "tophat",
+    emoji: "🎩",
+    name: "hat_names.tophat",
+    price: 300,
+    category: "hat",
+  },
+  {
+    id: "cap",
+    emoji: "🧢",
+    name: "hat_names.cap",
+    price: 150,
+    category: "hat",
+  },
+  {
+    id: "graduation",
+    emoji: "🎓",
+    name: "hat_names.graduation",
+    price: 400,
+    category: "hat",
+  },
+  {
+    id: "summer",
+    emoji: "👒",
+    name: "hat_names.summer",
+    price: 200,
+    category: "hat",
+  },
+  {
+    id: "helmet",
+    emoji: "⛑",
+    name: "hat_names.helmet",
+    price: 350,
+    category: "hat",
+  },
+];
+const GLASSES_SHOP = [
+  {
+    id: "none_g",
+    emoji: "🚫",
+    name: "glasses_names.none_g",
+    price: 0,
+    default: true,
+    category: "glasses",
+  },
+  {
+    id: "sunglasses",
+    emoji: "🕶",
+    name: "glasses_names.sunglasses",
+    price: 200,
+    category: "glasses",
+  },
+  {
+    id: "reading",
+    emoji: "👓",
+    name: "glasses_names.reading",
+    price: 150,
+    category: "glasses",
+  },
+  {
+    id: "swim",
+    emoji: "🥽",
+    name: "glasses_names.swim",
+    price: 250,
+    category: "glasses",
+  },
+];
+
+let ownedHats = ["none"];
+let ownedGlasses = ["none_g"];
+let equippedHat = "none";
+let equippedGlasses = "none_g";
+let totalCoins = 0;
+let maxLives = 3;
+let currentLives = 3;
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const nameInput = document.getElementById("nameInput");
+const playBtn = document.getElementById("playBtn");
+const restartBtn = document.getElementById("restartBtn");
+const menuBtn = document.getElementById("menuBtn");
+const restartGameBtn = document.getElementById("restartGameBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resumeBtn = document.getElementById("resumeBtn");
+const backMenuBtn = document.getElementById("backMenuBtn");
+const playerNameDisplay = document.getElementById("playerNameDisplay");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const finalScoreEl = document.getElementById("finalScore");
+const foodCountDisplay = document.getElementById("foodCountDisplay");
+const portalStatus = document.getElementById("portalStatus");
+const speedSelect = document.getElementById("speedSelect");
+const sizeSelect = document.getElementById("sizeSelect");
+const foodCountSelect = document.getElementById("foodCountSelect");
+const menuEl = document.getElementById("menu");
+const gameScreenEl = document.getElementById("gameScreen");
+const gameOverEl = document.getElementById("gameOver");
+const resultIcon = document.getElementById("resultIcon");
+const resultTitle = document.getElementById("resultTitle");
+const speedBtn = document.getElementById("speedBtn");
+const speedLabel = document.getElementById("speedLabel");
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
 const toggleBtn = document.getElementById("sidebarToggle");
 
-function toggleSidebar() {
-  sidebar.classList.toggle("visible");
-  overlay.classList.toggle("visible");
-}
-toggleBtn.addEventListener("click", toggleSidebar);
-overlay.addEventListener("click", toggleSidebar);
-
-document.querySelectorAll(".sidebar-item").forEach((el) => {
-  el.addEventListener("click", function () {
-    const target = document.getElementById(this.dataset.target);
-    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
-    document
-      .querySelectorAll(".sidebar-item")
-      .forEach((i) => i.classList.remove("active"));
-    this.classList.add("active");
-    if (window.innerWidth <= 850) toggleSidebar();
-  });
-});
-
-// ===== رنگ‌ها =====
-const ALL_COLORS = [
-  { name: "قرمز", code: "#e74c3c", emoji: "🔴" },
-  { name: "نارنجی", code: "#e67e22", emoji: "🟠" },
-  { name: "زرد", code: "#f1c40f", emoji: "🟡" },
-  { name: "سبز", code: "#2ecc71", emoji: "🟢" },
-  { name: "آبی", code: "#3498db", emoji: "🔵" },
-  { name: "بنفش", code: "#9b59b6", emoji: "🟣" },
-  { name: "قهوه‌ای", code: "#8B6914", emoji: "🟤" },
-  { name: "سفید", code: "#ecf0f1", emoji: "⚪" },
-  { name: "مشکی", code: "#2c3e50", emoji: "⚫" },
-  { name: "رنگین‌کمان", code: "rainbow", emoji: "🏳️‍🌈" },
-];
-
-let selectedColor = ALL_COLORS[0];
-
-// ===== کلاه‌ها (همه رایگان) =====
-const HAT_SHOP = [
-  { id: "none", emoji: "🚫", name: "بدون کلاه", price: 0, default: true },
-  { id: "crown", emoji: "👑", name: "تاج", price: 0 },
-  { id: "tophat", emoji: "🎩", name: "کلاه رسمی", price: 0 },
-  { id: "cap", emoji: "🧢", name: "کلاه بیسبال", price: 0 },
-  { id: "graduation", emoji: "🎓", name: "فارغ‌التحصیلی", price: 0 },
-  { id: "summer", emoji: "👒", name: "کلاه تابستانی", price: 0 },
-  { id: "helmet", emoji: "⛑", name: "کلاه ایمنی", price: 0 },
-];
-
-let ownedHats = ["none"];
-let equippedHat = "none";
-let totalCoins = Infinity;
-
-// ===== سیستم قلب (بینهایت) =====
-let maxLives = Infinity;
-let currentLives = Infinity;
-
-function resetLives() {
-  currentLives = Infinity;
-  updateHeartsDisplay();
-}
-
-function loseLife() {
-  // هیچوقت تموم نمیشه
-  return false;
-}
-
-function updateHeartsDisplay() {
-  const container = document.getElementById("heartsDisplay");
-  container.innerHTML = "";
-  // نمایش ۳ قلب با نشان بینهایت
-  for (let i = 0; i < 3; i++) {
-    const span = document.createElement("span");
-    span.className = "heart";
-    span.textContent = "❤️";
-    container.appendChild(span);
-  }
-  // اضافه کردن نشان بینهایت
-  const badge = document.createElement("span");
-  badge.className = "infinite-badge";
-  badge.textContent = "∞";
-  badge.style.marginLeft = "4px";
-  badge.style.fontSize = "0.8rem";
-  container.appendChild(badge);
-}
-
-// ===== فروشگاه (همه رایگان) =====
-function buildHatShop() {
-  const shop = document.getElementById("hatShop");
-  shop.innerHTML = "";
-  HAT_SHOP.forEach((hat) => {
-    const div = document.createElement("div");
-    div.className = "hat-shop-item";
-    const isOwned = true; // همه مالکیت دارند
-    const isEquipped = equippedHat === hat.id;
-    div.classList.add("owned");
-    if (isEquipped) div.classList.add("selected");
-    div.innerHTML = `
-                <span class="hat-emoji">${hat.emoji}</span>
-                <span class="hat-name">${hat.name}</span>
-                <span class="hat-price">💵 رایگان</span>
-                <span class="hat-status ${isEquipped ? "equipped" : "owned"}">
-                    ${isEquipped ? "✅ فعال" : "✔️ دارم"}
-                </span>
-            `;
-    div.addEventListener("click", function () {
-      equippedHat = hat.id;
-      updateHatShop();
-      updateHatDisplay();
-    });
-    shop.appendChild(div);
-  });
-}
-
-function updateHatShop() {
-  buildHatShop();
-  document.getElementById("totalCoinsDisplay").textContent = "∞";
-}
-
-function updateHatDisplay() {
-  const hat = HAT_SHOP.find((h) => h.id === equippedHat);
-  document.getElementById("hatDisplay").textContent = hat ? hat.emoji : "🚫";
-}
-
-function updateCoinDisplay() {
-  document.getElementById("scoreDisplay").textContent = "∞";
-  document.getElementById("totalCoinsDisplay").textContent = "∞";
-}
-
-// ===== ذخیره =====
-function saveProgress() {
-  try {
-    localStorage.setItem("snakeEquippedHat", equippedHat);
-  } catch (e) {}
-}
-
-function loadProgress() {
-  try {
-    const eq = localStorage.getItem("snakeEquippedHat");
-    if (eq) equippedHat = eq;
-  } catch (e) {}
-}
-
-// ===== ساخت رنگ‌ها =====
-function buildColorOptions() {
-  const picker = document.getElementById("colorPicker");
-  picker.innerHTML = "";
-  ALL_COLORS.forEach((color, index) => {
-    const div = document.createElement("div");
-    div.className = "color-option" + (index === 0 ? " active" : "");
-    if (color.code === "rainbow") {
-      div.style.background =
-        "linear-gradient(135deg, #e74c3c, #e67e22, #f1c40f, #2ecc71, #3498db, #9b59b6)";
-    } else {
-      div.style.background = color.code;
-      div.style.color =
-        color.code === "#ecf0f1" || color.code === "#f1c40f" ? "#333" : "#fff";
-    }
-    div.textContent = color.emoji;
-    div.dataset.index = index;
-    div.addEventListener("click", function () {
-      document
-        .querySelectorAll(".color-option")
-        .forEach((el) => el.classList.remove("active"));
-      this.classList.add("active");
-      selectedColor = ALL_COLORS[parseInt(this.dataset.index)];
-      state.snakeColor = selectedColor.code;
-    });
-    picker.appendChild(div);
-  });
-}
-
-// ===== موزیک =====
-let audio = new Audio();
-let musicLoaded = false;
-
-document.getElementById("musicInput").addEventListener("change", function (e) {
-  const file = e.target.files[0];
-  if (file) {
-    audio.src = URL.createObjectURL(file);
-    audio.loop = true;
-    audio.volume = 0.7;
-    musicLoaded = true;
-    document.getElementById("musicStatus").textContent = "✅ " + file.name;
-    document.getElementById("musicStatus").className = "music-status";
-  }
-});
-
-document.getElementById("playMusicBtn").addEventListener("click", () => {
-  if (musicLoaded) audio.play().catch(() => {});
-});
-document
-  .getElementById("pauseMusicBtn")
-  .addEventListener("click", () => audio.pause());
-document.getElementById("volumeSlider").addEventListener("input", function () {
-  audio.volume = this.value / 100;
-});
-
-function playMusicIfLoaded() {
-  if (musicLoaded) audio.play().catch(() => {});
-}
-
-// ===== وضعیت بازی =====
 let state = {
   playerName: "",
   snakeColor: "#e74c3c",
@@ -221,61 +739,20 @@ let state = {
   portalActive: false,
   won: false,
   respawning: false,
+  moveBuffer: [],
+  paused: false,
 };
-
-// ===== المان‌ها =====
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const nameInput = document.getElementById("nameInput");
-const colorPicker = document.getElementById("colorPicker");
-const playBtn = document.getElementById("playBtn");
-const restartBtn = document.getElementById("restartBtn");
-const menuBtn = document.getElementById("menuBtn");
-const playerNameDisplay = document.getElementById("playerNameDisplay");
-const scoreDisplay = document.getElementById("scoreDisplay");
-const finalScoreEl = document.getElementById("finalScore");
-const foodCountDisplay = document.getElementById("foodCountDisplay");
-const portalStatus = document.getElementById("portalStatus");
-const speedSelect = document.getElementById("speedSelect");
-const sizeSelect = document.getElementById("sizeSelect");
-const foodCountSelect = document.getElementById("foodCountSelect");
-const menuEl = document.getElementById("menu");
-const gameScreenEl = document.getElementById("gameScreen");
-const gameOverEl = document.getElementById("gameOver");
-const resultIcon = document.getElementById("resultIcon");
-const resultTitle = document.getElementById("resultTitle");
-const speedBtn = document.getElementById("speedBtn");
-const speedLabel = document.getElementById("speedLabel");
-
 let CELL_SIZE = canvas.width / state.gridSize;
+let dangerZones = [];
 
-// ===== تنظیم سرعت =====
 const SPEED_LEVELS = [
-  { value: 200, label: "آسان" },
-  { value: 140, label: "متوسط" },
-  { value: 80, label: "سخت" },
-  { value: 50, label: "خیلی سخت" },
+  { value: 200, label: "easy" },
+  { value: 140, label: "medium" },
+  { value: 80, label: "hard" },
+  { value: 50, label: "very_hard" },
 ];
 let currentSpeedIndex = 1;
 
-function updateSpeedDisplay() {
-  const level = SPEED_LEVELS[currentSpeedIndex];
-  speedLabel.textContent = level.label;
-  if (state.gameRunning && !state.gameOver) {
-    state.speed = level.value;
-    if (state.gameLoop) {
-      clearInterval(state.gameLoop);
-      state.gameLoop = setInterval(stepGame, state.speed);
-    }
-  }
-}
-
-speedBtn.addEventListener("click", () => {
-  currentSpeedIndex = (currentSpeedIndex + 1) % SPEED_LEVELS.length;
-  updateSpeedDisplay();
-});
-
-// ===== توابع کمکی =====
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -285,18 +762,15 @@ function randomPos() {
     y: randomInt(0, state.gridSize - 1),
   };
 }
-
 function isOccupied(pos, excludeFood = false) {
   for (let seg of state.snake)
     if (seg.x === pos.x && seg.y === pos.y) return true;
-  if (!excludeFood) {
+  if (!excludeFood)
     for (let f of state.food) if (f.x === pos.x && f.y === pos.y) return true;
-  }
   if (state.portal && state.portal.x === pos.x && state.portal.y === pos.y)
     return true;
   return false;
 }
-
 function spawnFood() {
   let pos,
     attempts = 0;
@@ -306,7 +780,6 @@ function spawnFood() {
   } while (isOccupied(pos) && attempts < 500);
   return pos;
 }
-
 function spawnPortal() {
   let pos,
     attempts = 0;
@@ -316,8 +789,7 @@ function spawnPortal() {
   } while (isOccupied(pos, true) && attempts < 500);
   return pos;
 }
-
-function lightenColor(hex, percent) {
+function lightenColorHex(hex, percent) {
   if (hex === "rainbow") return "#f1c40f";
   const num = parseInt(hex.replace("#", ""), 16);
   const amt = Math.round(2.55 * percent);
@@ -326,115 +798,776 @@ function lightenColor(hex, percent) {
   const B = Math.min(255, (num & 0x0000ff) + amt);
   return `#${((1 << 24) | (R << 16) | (G << 8) | B).toString(16).slice(1)}`;
 }
-
-// ===== ریستارت با جان (بینهایت) =====
-function respawnSnake() {
-  state.gameRunning = false;
-  if (state.gameLoop) {
-    clearInterval(state.gameLoop);
-    state.gameLoop = null;
+function resetLives() {
+  currentLives = maxLives;
+  updateHeartsDisplay();
+}
+function loseLife() {
+  currentLives--;
+  updateHeartsDisplay();
+  return currentLives <= 0;
+}
+function updateHeartsDisplay() {
+  const container = document.getElementById("heartsDisplay");
+  container.innerHTML = "";
+  for (let i = 0; i < maxLives; i++) {
+    const span = document.createElement("span");
+    span.className = "heart" + (i >= currentLives ? " lost" : "");
+    span.textContent = "❤️";
+    container.appendChild(span);
   }
-
-  const startX = Math.floor(state.gridSize / 2);
-  const startY = Math.floor(state.gridSize / 2);
-  state.snake = [
-    { x: startX, y: startY },
-    { x: startX - 1, y: startY },
-    { x: startX - 2, y: startY },
-  ];
-  state.direction = { dx: 1, dy: 0 };
-  state.food = [];
-  for (let i = 0; i < state.foodCount; i++) state.food.push(spawnFood());
-  state.portal = null;
-  state.portalActive = false;
-  updatePortalStatus();
-  state.gameRunning = true;
-  state.respawning = false;
-
-  if (state.gameLoop) clearInterval(state.gameLoop);
-  state.gameLoop = setInterval(stepGame, state.speed);
-  drawGame();
 }
 
-// ===== بازی =====
-function initGame() {
-  state.gridSize = parseInt(sizeSelect.value);
-  state.speed = parseInt(speedSelect.value);
-  state.foodCount = parseInt(foodCountSelect.value);
-  CELL_SIZE = canvas.width / state.gridSize;
+function spawnDangerZones() {
+  dangerZones = [];
+  for (let i = 0; i < 2 + Math.floor(state.gridSize / 10); i++) {
+    let pos,
+      attempts = 0;
+    do {
+      pos = randomPos();
+      attempts++;
+    } while (isOccupied(pos, true) && attempts < 300);
+    if (attempts < 300) dangerZones.push(pos);
+  }
+}
+function checkDangerZone(head) {
+  for (let dz of dangerZones)
+    if (dz.x === head.x && dz.y === head.y) return true;
+  return false;
+}
 
-  currentSpeedIndex = SPEED_LEVELS.findIndex((l) => l.value === state.speed);
-  if (currentSpeedIndex === -1) currentSpeedIndex = 1;
-  updateSpeedDisplay();
+function getStatusText(item, owned, equipped) {
+  if (equipped) return t("status_equipped");
+  if (owned) return t("status_owned");
+  return t("status_locked");
+}
 
-  const startX = Math.floor(state.gridSize / 2);
-  const startY = Math.floor(state.gridSize / 2);
-  state.snake = [
-    { x: startX, y: startY },
-    { x: startX - 1, y: startY },
-    { x: startX - 2, y: startY },
-  ];
-  state.direction = { dx: 1, dy: 0 };
-  state.score = 0;
-  state.gameOver = false;
-  state.gameRunning = true;
-  state.foodAnim = 0;
-  state.portal = null;
-  state.portalActive = false;
-  state.won = false;
-  state.respawning = false;
-  state.food = [];
-  for (let i = 0; i < state.foodCount; i++) state.food.push(spawnFood());
-  updateScore();
-  updateFoodCount();
-  updatePortalStatus();
-  resetLives();
+// ===== توابع فروشگاه =====
+function renderAllShops() {
+  renderHatShop();
+  renderGlassesShop();
+}
+
+function renderHatShop() {
+  const container = document.getElementById("hatShop");
+  container.innerHTML = "";
+  HAT_SHOP.forEach((item) => {
+    const isOwned = ownedHats.includes(item.id);
+    const isEquipped = equippedHat === item.id;
+    const isLocked = !isOwned && item.price > 0;
+    const itemName = getHatName(item.id);
+    const statusText = getStatusText(item, isOwned, isEquipped);
+    const priceText = item.price > 0 ? "💰 " + item.price : t("free");
+
+    const div = document.createElement("div");
+    div.className = "shop-item";
+    if (isOwned) div.classList.add("owned");
+    if (isLocked) div.classList.add("locked");
+    if (isEquipped) div.classList.add("selected");
+
+    div.innerHTML = `
+            <span class="item-emoji">${item.emoji}</span>
+            <span class="item-name">${itemName}</span>
+            <span class="item-price">${priceText}</span>
+            <span class="item-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">${statusText}</span>
+        `;
+
+    div.addEventListener("click", function (e) {
+      e.stopPropagation();
+      handleHatClick(item.id);
+    });
+    container.appendChild(div);
+  });
+}
+
+function renderGlassesShop() {
+  const container = document.getElementById("glassesShop");
+  container.innerHTML = "";
+  GLASSES_SHOP.forEach((item) => {
+    const isOwned = ownedGlasses.includes(item.id);
+    const isEquipped = equippedGlasses === item.id;
+    const isLocked = !isOwned && item.price > 0;
+    const itemName = getGlassesName(item.id);
+    const statusText = getStatusText(item, isOwned, isEquipped);
+    const priceText = item.price > 0 ? "💰 " + item.price : t("free");
+
+    const div = document.createElement("div");
+    div.className = "shop-item";
+    if (isOwned) div.classList.add("owned");
+    if (isLocked) div.classList.add("locked");
+    if (isEquipped) div.classList.add("selected");
+
+    div.innerHTML = `
+            <span class="item-emoji">${item.emoji}</span>
+            <span class="item-name">${itemName}</span>
+            <span class="item-price">${priceText}</span>
+            <span class="item-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">${statusText}</span>
+        `;
+
+    div.addEventListener("click", function (e) {
+      e.stopPropagation();
+      handleGlassesClick(item.id);
+    });
+    container.appendChild(div);
+  });
+}
+
+function handleHatClick(itemId) {
+  const item = HAT_SHOP.find((h) => h.id === itemId);
+  if (!item) return;
+
+  if (ownedHats.includes(itemId)) {
+    equippedHat = itemId;
+    renderAllShops();
+    updateAllDisplays();
+    showToast("✅ " + getHatName(itemId) + " equipped!", "success");
+    return;
+  }
+
+  if (item.price === 0) {
+    ownedHats.push(itemId);
+    equippedHat = itemId;
+    renderAllShops();
+    updateAllDisplays();
+    showToast("✅ " + getHatName(itemId) + " equipped!", "success");
+    return;
+  }
+
+  if (totalCoins >= item.price) {
+    totalCoins -= item.price;
+    ownedHats.push(itemId);
+    equippedHat = itemId;
+    renderAllShops();
+    updateAllDisplays();
+    saveProgress();
+    showToast(
+      "✅ Purchased " + getHatName(itemId) + " for " + item.price + " coins!",
+      "success",
+    );
+  } else {
+    showToast(
+      "❌ Not enough coins! Need " + item.price + ", you have " + totalCoins,
+      "error",
+    );
+  }
+}
+
+function handleGlassesClick(itemId) {
+  const item = GLASSES_SHOP.find((g) => g.id === itemId);
+  if (!item) return;
+
+  if (ownedGlasses.includes(itemId)) {
+    equippedGlasses = itemId;
+    renderAllShops();
+    updateAllDisplays();
+    showToast("✅ " + getGlassesName(itemId) + " equipped!", "success");
+    return;
+  }
+
+  if (item.price === 0) {
+    ownedGlasses.push(itemId);
+    equippedGlasses = itemId;
+    renderAllShops();
+    updateAllDisplays();
+    showToast("✅ " + getGlassesName(itemId) + " equipped!", "success");
+    return;
+  }
+
+  if (totalCoins >= item.price) {
+    totalCoins -= item.price;
+    ownedGlasses.push(itemId);
+    equippedGlasses = itemId;
+    renderAllShops();
+    updateAllDisplays();
+    saveProgress();
+    showToast(
+      "✅ Purchased " +
+        getGlassesName(itemId) +
+        " for " +
+        item.price +
+        " coins!",
+      "success",
+    );
+  } else {
+    showToast(
+      "❌ Not enough coins! Need " + item.price + ", you have " + totalCoins,
+      "error",
+    );
+  }
 }
 
 function updateScore() {
-  scoreDisplay.textContent = "∞";
-  updateCoinDisplay();
+  document.getElementById("scoreDisplay").textContent = totalCoins;
+  document.getElementById("totalCoinsDisplay").textContent = totalCoins;
+}
+
+function updateAllDisplays() {
+  renderAllShops();
+  updateScore();
+  updateHatDisplay();
+  updateGlassesDisplay();
+  updateSpinButtonState(); // 🔥 به‌روزرسانی دکمه چرخ
+  saveProgress();
+}
+
+function updateHatDisplay() {
+  const hat = HAT_SHOP.find((h) => h.id === equippedHat);
+  document.getElementById("hatDisplay").textContent = hat ? hat.emoji : "🚫";
+}
+function updateGlassesDisplay() {
+  const g = GLASSES_SHOP.find((h) => h.id === equippedGlasses);
+  document.getElementById("glassesDisplay").textContent = g ? g.emoji : "🚫";
+}
+function updatePortalStatus() {
+  if (state.portalActive && state.portal) {
+    portalStatus.textContent = "🚪 " + t("portal_active");
+    portalStatus.style.color = "#a29bfe";
+  } else {
+    portalStatus.textContent = "🚪 " + t("portal_inactive");
+    portalStatus.style.color = "#ff6b6b";
+  }
+}
+function updateSpeedDisplay() {
+  const level = SPEED_LEVELS[currentSpeedIndex];
+  speedLabel.textContent = getSpeedLabel(currentSpeedIndex);
+  if (state.gameRunning && !state.gameOver && !state.paused) {
+    state.speed = level.value;
+    if (state.gameLoop) {
+      clearInterval(state.gameLoop);
+      state.gameLoop = setInterval(stepGame, state.speed);
+    }
+  }
 }
 function updateFoodCount() {
   foodCountDisplay.textContent = state.food.length;
 }
 
-function updatePortalStatus() {
-  if (state.portalActive && state.portal) {
-    portalStatus.textContent = "🚪 پورتال: ✅ فعال";
-    portalStatus.style.color = "#a29bfe";
-  } else {
-    portalStatus.textContent = "🚪 پورتال: ❌ غیرفعال";
-    portalStatus.style.color = "#ff6b6b";
+// ============================================================
+//  🆕 WHEEL OF FORTUNE با هزینه ۹۹۹ و شرط ۶۰۰ پول
+// ============================================================
+const wheelCanvas = document.getElementById("wheelCanvas");
+const wheelCtx = wheelCanvas.getContext("2d");
+const wheelResult = document.getElementById("wheelResult");
+const spinBtn = document.getElementById("spinWheelBtn");
+const resetBtn = document.getElementById("resetWheelBtn");
+const wheelHistory = document.getElementById("wheelHistory");
+const spinCountEl = document.getElementById("spinCount");
+const totalWonEl = document.getElementById("totalWon");
+const wheelSpinsBadge = document.getElementById("wheelSpinsBadge");
+const wheelToggleBtn = document.getElementById("wheelToggleBtn");
+const wheelContent = document.getElementById("wheelContent");
+
+// بخش‌های چرخ - ۵ قسمت با جوایز مختلف
+const wheelSegments = [
+  { label: "💰 300", value: 300, color: "#e74c3c", emoji: "🪙" },
+  { label: "💰 500", value: 500, color: "#f39c12", emoji: "💎" },
+  { label: "💰 600", value: 600, color: "#2ecc71", emoji: "⭐" },
+  { label: "💰 1000", value: 1000, color: "#3498db", emoji: "🏆" },
+  { label: "💰 2000", value: 2000, color: "#9b59b6", emoji: "👑" },
+];
+
+let wheelRotation = 0;
+let isSpinning = false;
+let wheelHistoryList = [];
+let spinCount = 0;
+let totalWon = 0;
+const MAX_SPINS = 999;
+const SPIN_COST = 999; // 💰 هزینه هر چرخش
+const MIN_COINS_TO_ACTIVATE = 600; // 🎯 شرط فعال شدن دکمه
+
+// باز و بسته کردن چرخ
+let wheelOpen = false;
+wheelToggleBtn.addEventListener("click", function () {
+  wheelOpen = !wheelOpen;
+  wheelContent.classList.toggle("open", wheelOpen);
+  this.innerHTML = wheelOpen
+    ? '🔼 <span data-i18n="close">Close</span>'
+    : '🔽 <span data-i18n="open">Open</span>';
+  updateAllTexts();
+});
+
+// رسم چرخ
+function drawWheel(rotation) {
+  const centerX = wheelCanvas.width / 2;
+  const centerY = wheelCanvas.height / 2;
+  const radius = Math.min(wheelCanvas.width, wheelCanvas.height) / 2 - 10;
+  const segmentAngle = (Math.PI * 2) / wheelSegments.length;
+
+  wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+
+  wheelCtx.shadowColor = "rgba(255,215,0,0.2)";
+  wheelCtx.shadowBlur = 30;
+
+  wheelSegments.forEach((segment, i) => {
+    const startAngle = i * segmentAngle + rotation;
+    const endAngle = startAngle + segmentAngle;
+
+    wheelCtx.beginPath();
+    wheelCtx.moveTo(centerX, centerY);
+    wheelCtx.arc(centerX, centerY, radius, startAngle, endAngle);
+    wheelCtx.closePath();
+
+    const grad = wheelCtx.createRadialGradient(
+      centerX,
+      centerY,
+      0,
+      centerX,
+      centerY,
+      radius,
+    );
+    grad.addColorStop(0, lightenWheelColor(segment.color, 40));
+    grad.addColorStop(1, segment.color);
+    wheelCtx.fillStyle = grad;
+    wheelCtx.fill();
+
+    wheelCtx.strokeStyle = "rgba(255,255,255,0.2)";
+    wheelCtx.lineWidth = 2;
+    wheelCtx.stroke();
+
+    wheelCtx.shadowBlur = 0;
+    const midAngle = startAngle + segmentAngle / 2;
+    const textRadius = radius * 0.7;
+    const x = centerX + Math.cos(midAngle) * textRadius;
+    const y = centerY + Math.sin(midAngle) * textRadius;
+
+    wheelCtx.save();
+    wheelCtx.translate(x, y);
+    wheelCtx.rotate(midAngle + (midAngle > Math.PI / 2 ? Math.PI : 0));
+    wheelCtx.textAlign = "center";
+    wheelCtx.textBaseline = "middle";
+    wheelCtx.fillStyle = "#fff";
+    wheelCtx.font = 'bold 20px "Segoe UI", sans-serif';
+    wheelCtx.shadowColor = "rgba(0,0,0,0.5)";
+    wheelCtx.shadowBlur = 10;
+
+    wheelCtx.font = '28px "Segoe UI Emoji", sans-serif';
+    wheelCtx.fillText(segment.emoji, 0, -18);
+    wheelCtx.font = 'bold 16px "Segoe UI", sans-serif';
+    wheelCtx.fillStyle = "#fff";
+    wheelCtx.shadowBlur = 8;
+    wheelCtx.fillText(segment.label, 0, 18);
+    wheelCtx.restore();
+  });
+
+  wheelCtx.shadowBlur = 0;
+  const innerGrad = wheelCtx.createRadialGradient(
+    centerX,
+    centerY,
+    0,
+    centerX,
+    centerY,
+    20,
+  );
+  innerGrad.addColorStop(0, "#ffd700");
+  innerGrad.addColorStop(1, "#f39c12");
+  wheelCtx.beginPath();
+  wheelCtx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+  wheelCtx.fillStyle = innerGrad;
+  wheelCtx.fill();
+  wheelCtx.strokeStyle = "#fff";
+  wheelCtx.lineWidth = 3;
+  wheelCtx.stroke();
+
+  wheelCtx.shadowBlur = 0;
+  wheelCtx.beginPath();
+  wheelCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  wheelCtx.strokeStyle = "rgba(255,215,0,0.3)";
+  wheelCtx.lineWidth = 3;
+  wheelCtx.stroke();
+}
+
+function lightenWheelColor(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.min(255, (num >> 16) + amt);
+  const G = Math.min(255, ((num >> 8) & 0x00ff) + amt);
+  const B = Math.min(255, (num & 0x0000ff) + amt);
+  return `#${((1 << 24) | (R << 16) | (G << 8) | B).toString(16).slice(1)}`;
+}
+
+function getWinningSegment(rotation) {
+  const segmentAngle = (Math.PI * 2) / wheelSegments.length;
+  const pointerAngle = -Math.PI / 2;
+  let rawAngle = (pointerAngle - rotation) % (Math.PI * 2);
+  if (rawAngle < 0) rawAngle += Math.PI * 2;
+  const index = Math.floor(rawAngle / segmentAngle);
+  return index % wheelSegments.length;
+}
+
+// 🔥 تابع بررسى پول کافى
+function canAffordSpin() {
+  return totalCoins >= SPIN_COST;
+}
+
+function isSpinButtonActive() {
+  return totalCoins >= MIN_COINS_TO_ACTIVATE;
+}
+
+// 🆕 تابع به‌روزرسانى وضعیت دکمه چرخ
+function updateSpinButtonState() {
+  const remaining = MAX_SPINS - spinCount;
+  const hasEnoughCoins = canAffordSpin();
+  const canActivate = isSpinButtonActive();
+
+  wheelSpinsBadge.textContent = `🔄 ${remaining} spins left | 💰 ${totalCoins} coins`;
+
+  if (remaining <= 0) {
+    spinBtn.disabled = true;
+    spinBtn.innerHTML = "⛔ Max Spins Reached!";
+    spinBtn.style.opacity = "0.5";
+    return;
+  }
+
+  if (!canActivate) {
+    spinBtn.disabled = true;
+    spinBtn.innerHTML = `🔒 نیاز به ${MIN_COINS_TO_ACTIVATE} پول (دارى ${totalCoins})`;
+    spinBtn.style.opacity = "0.5";
+    return;
+  }
+
+  if (!hasEnoughCoins) {
+    spinBtn.disabled = true;
+    spinBtn.innerHTML = `❌ نیاز به ${SPIN_COST} پول (دارى ${totalCoins})`;
+    spinBtn.style.opacity = "0.5";
+    return;
+  }
+
+  spinBtn.disabled = false;
+  spinBtn.innerHTML = `🎰 Spin (${SPIN_COST}💰)`;
+  spinBtn.style.opacity = "1";
+}
+
+function updateWheelStats() {
+  spinCountEl.textContent = spinCount;
+  totalWonEl.textContent = totalWon;
+  updateSpinButtonState();
+}
+
+// 🔥 چرخاندن چرخ با هزینه
+function spinWheel() {
+  if (isSpinning) return;
+  if (spinCount >= MAX_SPINS) {
+    showToast("⛔ You have reached the maximum spins! (999)", "error");
+    return;
+  }
+
+  // ✅ چک کن که پول کافى دارى؟
+  if (!canAffordSpin()) {
+    showToast(
+      `❌ نیاز به ${SPIN_COST} پول دارى! (فقط ${totalCoins} پول دارى)`,
+      "error",
+    );
+    return;
+  }
+
+  // 💰 کم کردن هزینه
+  totalCoins -= SPIN_COST;
+  updateScore();
+  updateAllDisplays();
+  saveProgress();
+
+  isSpinning = true;
+  spinBtn.disabled = true;
+  wheelResult.innerHTML = '🔄 <span data-i18n="spinning">Spinning...</span>';
+
+  const spins = 5 + Math.random() * 5;
+  const targetRotation = spins * Math.PI * 2 + Math.random() * Math.PI * 2;
+  const startRotation = wheelRotation;
+  const duration = 3000 + Math.random() * 1000;
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const currentRotation = startRotation + targetRotation * eased;
+    wheelRotation = currentRotation;
+    drawWheel(currentRotation);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelRotation = currentRotation;
+      const winIndex = getWinningSegment(wheelRotation);
+      const winAmount = wheelSegments[winIndex].value;
+      const winEmoji = wheelSegments[winIndex].emoji;
+
+      spinCount++;
+      totalWon += winAmount;
+      totalCoins += winAmount; // جایزه رو اضافه کن
+      updateScore();
+      updateAllDisplays();
+      saveProgress();
+      updateWheelStats();
+
+      const msg = `${winEmoji} You won ${winAmount} coins! 🎉`;
+      wheelResult.innerHTML = `<span class="highlight">${msg}</span>`;
+      showToast(
+        `🎉 Won ${winAmount} coins! (${spinCount}/${MAX_SPINS})`,
+        "success",
+      );
+
+      wheelHistoryList.push(winAmount);
+      updateWheelHistory();
+
+      isSpinning = false;
+      updateSpinButtonState();
+    }
+  }
+  animate();
+}
+
+function updateWheelHistory() {
+  const lastFive = wheelHistoryList.slice(-10).reverse();
+  wheelHistory.innerHTML = lastFive
+    .map((amount) => `<span class="badge">💰 ${amount}</span>`)
+    .join("");
+}
+
+function resetWheelHistory() {
+  if (spinCount > 0) {
+    if (
+      !confirm(
+        "Are you sure you want to reset wheel history? Your coins will not be affected.",
+      )
+    )
+      return;
+  }
+  wheelHistoryList = [];
+  updateWheelHistory();
+  wheelResult.innerHTML =
+    '💰 <span data-i18n="spin_to_win">Spin to win!</span>';
+  showToast("🔄 History cleared!", "success");
+}
+
+spinBtn.addEventListener("click", spinWheel);
+resetBtn.addEventListener("click", resetWheelHistory);
+drawWheel(0);
+updateWheelStats();
+
+// ============================================================
+//  ذخیره و بازیابی
+// ============================================================
+function saveProgress() {
+  try {
+    const data = {
+      coins: totalCoins,
+      ownedHats: ownedHats,
+      equippedHat: equippedHat,
+      ownedGlasses: ownedGlasses,
+      equippedGlasses: equippedGlasses,
+      lives: currentLives,
+      lang: currentLang,
+      bgColor: selectedBgColor.code,
+      wheelHistory: wheelHistoryList,
+      spinCount: spinCount,
+      totalWon: totalWon,
+    };
+    localStorage.setItem("snakeGameData", JSON.stringify(data));
+  } catch (e) {}
+}
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem("snakeGameData");
+    if (!saved) return false;
+    const data = JSON.parse(saved);
+
+    if (data.coins !== undefined) totalCoins = data.coins;
+    if (data.ownedHats) ownedHats = data.ownedHats;
+    if (data.equippedHat) equippedHat = data.equippedHat;
+    if (data.ownedGlasses) ownedGlasses = data.ownedGlasses;
+    if (data.equippedGlasses) equippedGlasses = data.equippedGlasses;
+    if (data.lives !== undefined) currentLives = data.lives;
+    if (data.lang && LANGUAGES[data.lang]) {
+      currentLang = data.lang;
+      document
+        .querySelectorAll(".lang-btn")
+        .forEach((b) =>
+          b.classList.toggle("active", b.dataset.lang === data.lang),
+        );
+    }
+    if (data.bgColor) {
+      const found = BG_COLORS.find((c) => c.code === data.bgColor);
+      if (found) selectedBgColor = found;
+    }
+    if (data.wheelHistory) wheelHistoryList = data.wheelHistory;
+    if (data.spinCount !== undefined) spinCount = data.spinCount;
+    if (data.totalWon !== undefined) totalWon = data.totalWon;
+
+    if (!ownedHats.includes("none")) ownedHats.push("none");
+    if (!ownedGlasses.includes("none_g")) ownedGlasses.push("none_g");
+    return true;
+  } catch (e) {
+    return false;
   }
 }
 
-// ===== رسم کلاه =====
-function drawHat(x, y, size) {
-  const hat = HAT_SHOP.find((h) => h.id === equippedHat);
-  if (!hat || hat.id === "none") return;
+function buildColorOptions() {
+  const picker = document.getElementById("colorPicker");
+  picker.innerHTML = "";
+  ALL_COLORS.forEach((color, index) => {
+    const div = document.createElement("div");
+    div.className = "color-option" + (index === 0 ? " active" : "");
+    if (color.code === "rainbow") {
+      div.style.background =
+        "linear-gradient(135deg, #e74c3c, #e67e22, #f1c40f, #2ecc71, #3498db, #9b59b6, #fd79a8)";
+    } else {
+      div.style.background = color.code;
+    }
+    div.dataset.index = index;
+    div.addEventListener("click", function () {
+      document
+        .querySelectorAll(".color-option")
+        .forEach((el) => el.classList.remove("active"));
+      this.classList.add("active");
+      selectedColor = ALL_COLORS[parseInt(this.dataset.index)];
+      state.snakeColor = selectedColor.code;
+    });
+    picker.appendChild(div);
+  });
 
-  const emoji = hat.emoji;
-  ctx.font = `${size * 1.2}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+  const bgPicker = document.getElementById("bgColorPicker");
+  bgPicker.innerHTML = "";
+  BG_COLORS.forEach((color, index) => {
+    const div = document.createElement("div");
+    div.className = "bg-color-option" + (index === 0 ? " active" : "");
+    div.style.background = color.code;
+    if (color.code === "#ecf0f1" || color.code === "#f1c40f") {
+      div.style.border = "3px solid rgba(0,0,0,0.2)";
+    }
+    div.dataset.index = index;
+    div.addEventListener("click", function () {
+      document
+        .querySelectorAll(".bg-color-option")
+        .forEach((el) => el.classList.remove("active"));
+      this.classList.add("active");
+      selectedBgColor = BG_COLORS[parseInt(this.dataset.index)];
+      drawGame();
+      saveProgress();
+    });
+    bgPicker.appendChild(div);
+  });
+  const bgIndex = BG_COLORS.findIndex((c) => c.code === selectedBgColor.code);
+  if (bgIndex >= 0) {
+    document.querySelectorAll(".bg-color-option").forEach((el, i) => {
+      el.classList.toggle("active", i === bgIndex);
+    });
+  }
+}
+
+// ============================================================
+//  PAUSE / RESUME / BACK FUNCTIONS
+// ============================================================
+function pauseGame() {
+  if (state.gameOver || !state.gameRunning) return;
+  state.paused = true;
+  if (state.gameLoop) {
+    clearInterval(state.gameLoop);
+    state.gameLoop = null;
+  }
+  pauseBtn.classList.add("hidden");
+  resumeBtn.classList.remove("hidden");
+  drawPauseScreen();
+}
+
+function resumeGame() {
+  if (state.gameOver || !state.gameRunning) return;
+  state.paused = false;
+  if (state.gameLoop) clearInterval(state.gameLoop);
+  state.gameLoop = setInterval(stepGame, state.speed);
+  pauseBtn.classList.remove("hidden");
+  resumeBtn.classList.add("hidden");
+  drawGame();
+}
+
+function backToMenu() {
+  if (state.gameLoop) {
+    clearInterval(state.gameLoop);
+    state.gameLoop = null;
+  }
+  state.gameRunning = false;
+  state.paused = false;
+  bgMusic.pause();
+  gameScreenEl.style.display = "none";
+  gameOverEl.style.display = "none";
+  menuEl.style.display = "block";
+  pauseBtn.classList.remove("hidden");
+  resumeBtn.classList.add("hidden");
+  saveProgress();
+  document.getElementById("snowContainer").style.opacity = "1";
+  setTimeout(createSnowflakes, 200);
+}
+
+function drawPauseScreen() {
+  ctx.fillStyle = selectedBgColor.code;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#ffd700";
+  ctx.font = 'bold 60px "Segoe UI", sans-serif';
   ctx.textAlign = "center";
-  ctx.textBaseline = "bottom";
-  ctx.shadowColor = "rgba(255,255,255,0.3)";
-  ctx.shadowBlur = 20;
-  ctx.fillText(emoji, x + size / 2, y - 2);
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(255,215,0,0.3)";
+  ctx.shadowBlur = 30;
+  ctx.fillText("⏸", canvas.width / 2, canvas.height / 2 - 30);
+  ctx.font = 'bold 28px "Segoe UI", sans-serif';
+  ctx.fillStyle = "#fff";
+  ctx.shadowBlur = 10;
+  ctx.fillText(t("pause_btn"), canvas.width / 2, canvas.height / 2 + 50);
   ctx.shadowBlur = 0;
 }
 
-// ===== رسم پورتال =====
+pauseBtn.addEventListener("click", pauseGame);
+resumeBtn.addEventListener("click", resumeGame);
+backMenuBtn.addEventListener("click", function () {
+  if (state.gameRunning && !state.gameOver && !state.paused) {
+    if (
+      confirm(
+        "Are you sure you want to go back to menu? Your progress will be saved.",
+      )
+    ) {
+      backToMenu();
+    }
+  } else {
+    backToMenu();
+  }
+});
+
+// ============================================================
+//  DRAWING FUNCTIONS
+// ============================================================
+function drawAccessories(x, y, size) {
+  const hat = HAT_SHOP.find((h) => h.id === equippedHat);
+  if (hat && hat.id !== "none") {
+    ctx.font = `${size * 1.0}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.shadowColor = "rgba(255,255,255,0.2)";
+    ctx.shadowBlur = 15;
+    ctx.fillText(hat.emoji, x + size / 2, y - 1);
+    ctx.shadowBlur = 0;
+  }
+  const glasses = GLASSES_SHOP.find((g) => g.id === equippedGlasses);
+  if (glasses && glasses.id !== "none_g") {
+    ctx.font = `${size * 0.55}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowColor = "rgba(255,255,255,0.15)";
+    ctx.shadowBlur = 10;
+    ctx.fillText(glasses.emoji, x + size / 2, y + size / 2 - 2);
+    ctx.shadowBlur = 0;
+  }
+}
+
 function drawPortal() {
   if (!state.portal || !state.portalActive) return;
-
   const x = state.portal.x * CELL_SIZE;
   const y = state.portal.y * CELL_SIZE;
   const size = CELL_SIZE;
   const cx = x + size / 2;
   const cy = y + size / 2;
   const radius = size * 0.6;
-
   const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.5);
   grad.addColorStop(0, "rgba(162, 155, 254, 0.8)");
   grad.addColorStop(0.3, "rgba(162, 155, 254, 0.4)");
@@ -443,11 +1576,9 @@ function drawPortal() {
   ctx.beginPath();
   ctx.arc(cx, cy, radius * 1.5, 0, Math.PI * 2);
   ctx.fill();
-
   const time = Date.now() / 1000;
   ctx.shadowColor = "#a29bfe";
   ctx.shadowBlur = 30;
-
   for (let i = 0; i < 3; i++) {
     const angle = time * 1.5 + i * ((Math.PI * 2) / 3);
     const r = radius * 0.7;
@@ -458,386 +1589,455 @@ function drawPortal() {
     ctx.arc(px, py, radius * 0.15, 0, Math.PI * 2);
     ctx.fill();
   }
-
   ctx.fillStyle = "rgba(162, 155, 254, 0.6)";
   ctx.shadowBlur = 40;
   ctx.beginPath();
   ctx.arc(cx, cy, radius * 0.3, 0, Math.PI * 2);
   ctx.fill();
-
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#fff";
   ctx.font = "bold 14px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("🌀", cx, cy);
-
+  ctx.fillText("🌌", cx, cy);
   ctx.shadowBlur = 0;
 }
 
-// ===== رسم مار =====
-function drawGame() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // گرید
-  ctx.strokeStyle = "rgba(255,255,255,0.05)";
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i <= state.gridSize; i++) {
-    ctx.beginPath();
-    ctx.moveTo(i * CELL_SIZE, 0);
-    ctx.lineTo(i * CELL_SIZE, canvas.height);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, i * CELL_SIZE);
-    ctx.lineTo(canvas.width, i * CELL_SIZE);
-    ctx.stroke();
-  }
-
-  // غذاها
-  const foodColors = [
-    "#ff6b6b",
-    "#ffd93d",
-    "#ff9f43",
-    "#00d2d3",
-    "#a29bfe",
-    "#fd79a8",
-    "#00cec9",
-    "#e17055",
-  ];
-  state.foodAnim += 0.04;
-  for (let f of state.food) {
-    const cx = f.x * CELL_SIZE + CELL_SIZE / 2;
-    const cy = f.y * CELL_SIZE + CELL_SIZE / 2;
-    const color = foodColors[Math.floor(Math.random() * foodColors.length)];
-    const pulse = 0.85 + 0.15 * Math.sin(state.foodAnim + f.x + f.y);
-    const radius = (CELL_SIZE / 2 - 3) * pulse;
-
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.8);
-    glow.addColorStop(0, color + "60");
-    glow.addColorStop(1, "transparent");
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius * 1.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 25;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    ctx.fillStyle = "rgba(255,255,255,0.25)";
-    ctx.beginPath();
-    ctx.arc(
-      cx - radius * 0.25,
-      cy - radius * 0.25,
-      radius * 0.35,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
-  }
-
-  // پورتال
-  if (state.portalActive) {
-    drawPortal();
-  }
-
-  // ===== مار =====
-  const snakeColor = state.snakeColor;
-  const segments = state.snake;
-
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i];
-    const x = seg.x * CELL_SIZE;
-    const y = seg.y * CELL_SIZE;
-    const padding = i === 0 ? 1 : 2;
-    const size = CELL_SIZE - padding * 2;
-
-    let color;
-    if (snakeColor === "rainbow") {
-      const hue = (i * 25 + Date.now() * 0.02) % 360;
-      color = `hsl(${hue}, 80%, 55%)`;
-    } else {
-      const brightness = 1 - (i / segments.length) * 0.25;
-      color = lightenColor(snakeColor, brightness * 25);
-    }
-
-    ctx.shadowColor = snakeColor === "rainbow" ? "#f1c40f" : snakeColor;
-    ctx.shadowBlur = i === 0 ? 30 : 10;
-    ctx.fillStyle = color;
-
+function drawDangerZones() {
+  for (let dz of dangerZones) {
+    const x = dz.x * CELL_SIZE;
+    const y = dz.y * CELL_SIZE;
+    const size = CELL_SIZE;
+    const pulse = 0.8 + 0.2 * Math.sin(Date.now() / 400 + dz.x + dz.y);
+    ctx.shadowColor = "#e74c3c";
+    ctx.shadowBlur = 25 * pulse;
+    ctx.fillStyle = `rgba(231, 76, 60, ${0.2 * pulse})`;
     ctx.beginPath();
     ctx.ellipse(
-      x + CELL_SIZE / 2,
-      y + CELL_SIZE / 2,
-      size / 1.8,
-      size / 1.8,
+      x + size / 2,
+      y + size / 2,
+      (size / 2) * pulse,
+      (size / 2) * pulse,
       0,
       0,
       Math.PI * 2,
     );
     ctx.fill();
-
-    // سر
-    if (i === 0) {
-      ctx.shadowBlur = 0;
-      drawHat(x, y, CELL_SIZE);
-
-      // چشم‌ها
-      const eyeSize = size * 0.22;
-      const eyeOff = size * 0.28;
-      const d = state.direction;
-
-      ctx.fillStyle = "#fff";
-      ctx.shadowColor = "rgba(255,255,255,0.2)";
-      ctx.shadowBlur = 8;
-
-      if (d.dx === 1) {
-        ctx.beginPath();
-        ctx.ellipse(
-          x + CELL_SIZE - eyeOff + 2,
-          y + 7,
-          eyeSize,
-          eyeSize * 1.1,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(
-          x + CELL_SIZE - eyeOff + 2,
-          y + CELL_SIZE - 7,
-          eyeSize,
-          eyeSize * 1.1,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - eyeOff + 5,
-          y + 7,
-          eyeSize * 0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - eyeOff + 5,
-          y + CELL_SIZE - 7,
-          eyeSize * 0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - eyeOff + 3,
-          y + 5.5,
-          eyeSize * 0.2,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - eyeOff + 3,
-          y + CELL_SIZE - 8.5,
-          eyeSize * 0.2,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-      } else if (d.dx === -1) {
-        ctx.beginPath();
-        ctx.ellipse(
-          x + eyeOff - 2,
-          y + 7,
-          eyeSize,
-          eyeSize * 1.1,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(
-          x + eyeOff - 2,
-          y + CELL_SIZE - 7,
-          eyeSize,
-          eyeSize * 1.1,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(x + eyeOff - 5, y + 7, eyeSize * 0.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + eyeOff - 5,
-          y + CELL_SIZE - 7,
-          eyeSize * 0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.beginPath();
-        ctx.arc(x + eyeOff - 3, y + 5.5, eyeSize * 0.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + eyeOff - 3,
-          y + CELL_SIZE - 8.5,
-          eyeSize * 0.2,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-      } else if (d.dy === -1) {
-        ctx.beginPath();
-        ctx.ellipse(
-          x + 7,
-          y + eyeOff - 2,
-          eyeSize * 1.1,
-          eyeSize,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(
-          x + CELL_SIZE - 7,
-          y + eyeOff - 2,
-          eyeSize * 1.1,
-          eyeSize,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(x + 7, y + eyeOff - 5, eyeSize * 0.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - 7,
-          y + eyeOff - 5,
-          eyeSize * 0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.beginPath();
-        ctx.arc(x + 5.5, y + eyeOff - 3, eyeSize * 0.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - 8.5,
-          y + eyeOff - 3,
-          eyeSize * 0.2,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        ctx.ellipse(
-          x + 7,
-          y + CELL_SIZE - eyeOff + 2,
-          eyeSize * 1.1,
-          eyeSize,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(
-          x + CELL_SIZE - 7,
-          y + CELL_SIZE - eyeOff + 2,
-          eyeSize * 1.1,
-          eyeSize,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(
-          x + 7,
-          y + CELL_SIZE - eyeOff + 5,
-          eyeSize * 0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - 7,
-          y + CELL_SIZE - eyeOff + 5,
-          eyeSize * 0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.beginPath();
-        ctx.arc(
-          x + 5.5,
-          y + CELL_SIZE - eyeOff + 3,
-          eyeSize * 0.2,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(
-          x + CELL_SIZE - 8.5,
-          y + CELL_SIZE - eyeOff + 3,
-          eyeSize * 0.2,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-      }
-
-      ctx.shadowBlur = 0;
-    }
+    ctx.font = `${size * 0.7}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = `rgba(255, 200, 0, ${0.5 + 0.5 * pulse})`;
+    ctx.shadowBlur = 15 * pulse;
+    ctx.fillText("⚠️", x + size / 2, y + size / 2);
     ctx.shadowBlur = 0;
   }
 }
 
-// ===== گام بازی =====
-function stepGame() {
-  if (state.gameOver || !state.gameRunning || state.respawning) return;
+function drawGame() {
+  if (state.paused) {
+    drawPauseScreen();
+    return;
+  }
+  ctx.fillStyle = selectedBgColor.code;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  const foodEmojis = getFoodEmojis();
+  state.foodAnim += 0.04;
+  for (let fi = 0; fi < state.food.length; fi++) {
+    const f = state.food[fi];
+    const cx = f.x * CELL_SIZE + CELL_SIZE / 2;
+    const cy = f.y * CELL_SIZE + CELL_SIZE / 2;
+    const size = CELL_SIZE;
+    const pulse = 0.85 + 0.15 * Math.sin(state.foodAnim + f.x + f.y);
+    const emoji = foodEmojis[fi % foodEmojis.length];
+    ctx.shadowColor = "#ffd700";
+    ctx.shadowBlur = 25 * pulse;
+    ctx.font = `${size * 0.85}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(emoji, cx, cy + 2);
+    ctx.shadowBlur = 0;
+  }
+
+  if (state.portalActive) drawPortal();
+  drawDangerZones();
+
+  const snakeColor = state.snakeColor;
+  const segments = state.snake;
+  const len = segments.length;
+  const size = CELL_SIZE;
+  for (let i = 0; i < len; i++) {
+    const seg = segments[i];
+    const x = seg.x * size;
+    const y = seg.y * size;
+    const isHead = i === 0;
+    let color;
+    if (snakeColor === "rainbow") {
+      const hue = (i * 20 + Date.now() * 0.02) % 360;
+      color = `hsl(${hue}, 80%, 55%)`;
+    } else {
+      const brightness = 0.9 - (i / len) * 0.3;
+      color = lightenColorHex(snakeColor, brightness * 30);
+    }
+    ctx.shadowColor = snakeColor === "rainbow" ? "#f1c40f" : snakeColor;
+    ctx.shadowBlur = isHead ? 25 : 12;
+    const pad = 1.5;
+    const rectSize = size - pad * 2;
+    const radius = 4;
+    ctx.beginPath();
+    ctx.moveTo(x + pad + radius, y + pad);
+    ctx.lineTo(x + pad + rectSize - radius, y + pad);
+    ctx.quadraticCurveTo(
+      x + pad + rectSize,
+      y + pad,
+      x + pad + rectSize,
+      y + pad + radius,
+    );
+    ctx.lineTo(x + pad + rectSize, y + pad + rectSize - radius);
+    ctx.quadraticCurveTo(
+      x + pad + rectSize,
+      y + pad + rectSize,
+      x + pad + rectSize - radius,
+      y + pad + rectSize,
+    );
+    ctx.lineTo(x + pad + radius, y + pad + rectSize);
+    ctx.quadraticCurveTo(
+      x + pad,
+      y + pad + rectSize,
+      x + pad,
+      y + pad + rectSize - radius,
+    );
+    ctx.lineTo(x + pad, y + pad + radius);
+    ctx.quadraticCurveTo(x + pad, y + pad, x + pad + radius, y + pad);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    if (i > 0) {
+      const prev = segments[i - 1];
+      const dx = seg.x - prev.x;
+      const dy = seg.y - prev.y;
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = color;
+      if (dx === 1) {
+        ctx.fillRect(prev.x * size + size - 2, prev.y * size + 3, 4, size - 6);
+      } else if (dx === -1) {
+        ctx.fillRect(seg.x * size + size - 2, seg.y * size + 3, 4, size - 6);
+      } else if (dy === 1) {
+        ctx.fillRect(prev.x * size + 3, prev.y * size + size - 2, size - 6, 4);
+      } else if (dy === -1) {
+        ctx.fillRect(seg.x * size + 3, seg.y * size + size - 2, size - 6, 4);
+      }
+    }
+    ctx.shadowBlur = 0;
+    if (isHead) {
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 1.5;
+      const hPad = 2;
+      const hSize = size - hPad * 2;
+      const hRadius = 5;
+      ctx.beginPath();
+      ctx.moveTo(x + hPad + hRadius, y + hPad);
+      ctx.lineTo(x + hPad + hSize - hRadius, y + hPad);
+      ctx.quadraticCurveTo(
+        x + hPad + hSize,
+        y + hPad,
+        x + hPad + hSize,
+        y + hPad + hRadius,
+      );
+      ctx.lineTo(x + hPad + hSize, y + hPad + hSize - hRadius);
+      ctx.quadraticCurveTo(
+        x + hPad + hSize,
+        y + hPad + hSize,
+        x + hPad + hSize - hRadius,
+        y + hPad + hSize,
+      );
+      ctx.lineTo(x + hPad + hRadius, y + hPad + hSize);
+      ctx.quadraticCurveTo(
+        x + hPad,
+        y + hPad + hSize,
+        x + hPad,
+        y + hPad + hSize - hRadius,
+      );
+      ctx.lineTo(x + hPad, y + hPad + hRadius);
+      ctx.quadraticCurveTo(x + hPad, y + hPad, x + hPad + hRadius, y + hPad);
+      ctx.closePath();
+      ctx.stroke();
+      drawAccessories(x, y, size);
+      const eyeSize = size * 0.18;
+      const eyeOff = size * 0.25;
+      const d = state.direction;
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "rgba(255,255,255,0.15)";
+      ctx.shadowBlur = 6;
+      if (d.dx === 1) {
+        ctx.fillRect(
+          x + size - eyeOff - 2,
+          y + 5,
+          eyeSize * 1.3,
+          eyeSize * 1.4,
+        );
+        ctx.fillRect(
+          x + size - eyeOff - 2,
+          y + size - 5 - eyeSize * 1.4,
+          eyeSize * 1.3,
+          eyeSize * 1.4,
+        );
+        ctx.fillStyle = "#1a1a2e";
+        ctx.shadowBlur = 0;
+        ctx.fillRect(
+          x + size - eyeOff + 2,
+          y + 8,
+          eyeSize * 0.6,
+          eyeSize * 0.7,
+        );
+        ctx.fillRect(
+          x + size - eyeOff + 2,
+          y + size - 8 - eyeSize * 0.7,
+          eyeSize * 0.6,
+          eyeSize * 0.7,
+        );
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillRect(
+          x + size - eyeOff + 0,
+          y + 6,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+        ctx.fillRect(
+          x + size - eyeOff + 0,
+          y + size - 6 - eyeSize * 0.25,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+      } else if (d.dx === -1) {
+        ctx.fillRect(
+          x + eyeOff - eyeSize * 1.3,
+          y + 5,
+          eyeSize * 1.3,
+          eyeSize * 1.4,
+        );
+        ctx.fillRect(
+          x + eyeOff - eyeSize * 1.3,
+          y + size - 5 - eyeSize * 1.4,
+          eyeSize * 1.3,
+          eyeSize * 1.4,
+        );
+        ctx.fillStyle = "#1a1a2e";
+        ctx.shadowBlur = 0;
+        ctx.fillRect(
+          x + eyeOff - eyeSize * 0.6 - 2,
+          y + 8,
+          eyeSize * 0.6,
+          eyeSize * 0.7,
+        );
+        ctx.fillRect(
+          x + eyeOff - eyeSize * 0.6 - 2,
+          y + size - 8 - eyeSize * 0.7,
+          eyeSize * 0.6,
+          eyeSize * 0.7,
+        );
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillRect(
+          x + eyeOff - eyeSize * 0.25 - 1,
+          y + 6,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+        ctx.fillRect(
+          x + eyeOff - eyeSize * 0.25 - 1,
+          y + size - 6 - eyeSize * 0.25,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+      } else if (d.dy === -1) {
+        ctx.fillRect(x + 5, y + eyeOff - 2, eyeSize * 1.4, eyeSize * 1.3);
+        ctx.fillRect(
+          x + size - 5 - eyeSize * 1.4,
+          y + eyeOff - 2,
+          eyeSize * 1.4,
+          eyeSize * 1.3,
+        );
+        ctx.fillStyle = "#1a1a2e";
+        ctx.shadowBlur = 0;
+        ctx.fillRect(x + 8, y + eyeOff + 2, eyeSize * 0.7, eyeSize * 0.6);
+        ctx.fillRect(
+          x + size - 8 - eyeSize * 0.7,
+          y + eyeOff + 2,
+          eyeSize * 0.7,
+          eyeSize * 0.6,
+        );
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillRect(x + 6, y + eyeOff + 0, eyeSize * 0.25, eyeSize * 0.25);
+        ctx.fillRect(
+          x + size - 6 - eyeSize * 0.25,
+          y + eyeOff + 0,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+      } else {
+        ctx.fillRect(
+          x + 5,
+          y + size - eyeOff - eyeSize * 1.3 + 2,
+          eyeSize * 1.4,
+          eyeSize * 1.3,
+        );
+        ctx.fillRect(
+          x + size - 5 - eyeSize * 1.4,
+          y + size - eyeOff - eyeSize * 1.3 + 2,
+          eyeSize * 1.4,
+          eyeSize * 1.3,
+        );
+        ctx.fillStyle = "#1a1a2e";
+        ctx.shadowBlur = 0;
+        ctx.fillRect(
+          x + 8,
+          y + size - eyeOff - eyeSize * 0.6 - 2,
+          eyeSize * 0.7,
+          eyeSize * 0.6,
+        );
+        ctx.fillRect(
+          x + size - 8 - eyeSize * 0.7,
+          y + size - eyeOff - eyeSize * 0.6 - 2,
+          eyeSize * 0.7,
+          eyeSize * 0.6,
+        );
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillRect(
+          x + 6,
+          y + size - eyeOff - eyeSize * 0.25 - 1,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+        ctx.fillRect(
+          x + size - 6 - eyeSize * 0.25,
+          y + size - eyeOff - eyeSize * 0.25 - 1,
+          eyeSize * 0.25,
+          eyeSize * 0.25,
+        );
+      }
+      ctx.shadowBlur = 0;
+    }
+  }
+}
+
+function wrapPosition(pos) {
+  let newPos = { ...pos };
+  if (newPos.x < 0) newPos.x = state.gridSize - 1;
+  else if (newPos.x >= state.gridSize) newPos.x = 0;
+  if (newPos.y < 0) newPos.y = state.gridSize - 1;
+  else if (newPos.y >= state.gridSize) newPos.y = 0;
+  return newPos;
+}
+
+function respawnSnake() {
+  state.gameRunning = false;
+  if (state.gameLoop) {
+    clearInterval(state.gameLoop);
+    state.gameLoop = null;
+  }
+  const startX = Math.floor(state.gridSize / 2);
+  const startY = Math.floor(state.gridSize / 2);
+  state.snake = [
+    { x: startX, y: startY },
+    { x: startX - 1, y: startY },
+    { x: startX - 2, y: startY },
+  ];
+  state.direction = { dx: 1, dy: 0 };
+  state.moveBuffer = [];
+  state.food = [];
+  for (let i = 0; i < state.foodCount; i++) state.food.push(spawnFood());
+  state.portal = null;
+  state.portalActive = false;
+  updatePortalStatus();
+  state.gameRunning = true;
+  state.respawning = false;
+  if (state.gameLoop) clearInterval(state.gameLoop);
+  state.gameLoop = setInterval(stepGame, state.speed);
+  drawGame();
+}
+
+function initGame() {
+  state.gridSize = parseInt(sizeSelect.value);
+  state.speed = parseInt(speedSelect.value);
+  state.foodCount = parseInt(foodCountSelect.value);
+  CELL_SIZE = canvas.width / state.gridSize;
+  currentSpeedIndex = SPEED_LEVELS.findIndex((l) => l.value === state.speed);
+  if (currentSpeedIndex === -1) currentSpeedIndex = 1;
+  updateSpeedDisplay();
+  const startX = Math.floor(state.gridSize / 2);
+  const startY = Math.floor(state.gridSize / 2);
+  state.snake = [
+    { x: startX, y: startY },
+    { x: startX - 1, y: startY },
+    { x: startX - 2, y: startY },
+  ];
+  state.direction = { dx: 1, dy: 0 };
+  state.moveBuffer = [];
+  state.score = 0;
+  state.gameOver = false;
+  state.gameRunning = true;
+  state.foodAnim = 0;
+  state.portal = null;
+  state.portalActive = false;
+  state.won = false;
+  state.respawning = false;
+  state.paused = false;
+  state.food = [];
+  for (let i = 0; i < state.foodCount; i++) state.food.push(spawnFood());
+  spawnDangerZones();
+  updateFoodCount();
+  updatePortalStatus();
+  resetLives();
+  updateScore();
+  saveProgress();
+  pauseBtn.classList.remove("hidden");
+  resumeBtn.classList.add("hidden");
+}
+
+function stepGame() {
+  if (state.gameOver || !state.gameRunning || state.respawning || state.paused)
+    return;
+  if (state.moveBuffer.length > 0) {
+    const nextMove = state.moveBuffer.shift();
+    const dir = state.direction;
+    if (
+      (nextMove.dx === 1 && dir.dx !== -1) ||
+      (nextMove.dx === -1 && dir.dx !== 1) ||
+      (nextMove.dy === 1 && dir.dy !== -1) ||
+      (nextMove.dy === -1 && dir.dy !== 1)
+    ) {
+      state.direction = nextMove;
+    }
+  }
   const head = state.snake[0];
-  const newHead = {
+  let newHead = {
     x: head.x + state.direction.dx,
     y: head.y + state.direction.dy,
   };
 
-  // ===== پورتال =====
+  newHead = wrapPosition(newHead);
+
+  if (checkDangerZone(newHead)) {
+    const gameOver = loseLife();
+    if (gameOver) {
+      endGame(false);
+      return;
+    }
+    dangerZones = dangerZones.filter(
+      (dz) => !(dz.x === newHead.x && dz.y === newHead.y),
+    );
+    state.respawning = true;
+    state.gameRunning = false;
+    if (state.gameLoop) {
+      clearInterval(state.gameLoop);
+      state.gameLoop = null;
+    }
+    setTimeout(() => {
+      respawnSnake();
+    }, 300);
+    return;
+  }
   if (
     state.portalActive &&
     state.portal &&
@@ -848,19 +2048,6 @@ function stepGame() {
     endGame(true);
     return;
   }
-
-  // ===== برخورد با دیوار =====
-  if (
-    newHead.x < 0 ||
-    newHead.x >= state.gridSize ||
-    newHead.y < 0 ||
-    newHead.y >= state.gridSize
-  ) {
-    handleDeath();
-    return;
-  }
-
-  // ===== برخورد با خودش =====
   if (
     state.snake.some(
       (seg, idx) => idx > 0 && seg.x === newHead.x && seg.y === newHead.y,
@@ -869,9 +2056,7 @@ function stepGame() {
     handleDeath();
     return;
   }
-
   state.snake.unshift(newHead);
-
   let ate = false;
   for (let fi = state.food.length - 1; fi >= 0; fi--) {
     const food = state.food[fi];
@@ -879,31 +2064,31 @@ function stepGame() {
       state.food.splice(fi, 1);
       ate = true;
       state.score++;
-      // سکه بینهایت، نیازی به اضافه کردن نیست
-
+      totalCoins += 10;
+      updateScore();
       if (state.score >= 100 && !state.portalActive) {
         state.portal = spawnPortal();
         state.portalActive = true;
         updatePortalStatus();
       }
-
       break;
     }
   }
-
-  if (!ate) {
-    state.snake.pop();
-  }
-
-  while (state.food.length < state.foodCount) {
-    state.food.push(spawnFood());
+  if (!ate) state.snake.pop();
+  while (state.food.length < state.foodCount) state.food.push(spawnFood());
+  while (dangerZones.length < 2 + Math.floor(state.gridSize / 10)) {
+    let pos,
+      attempts = 0;
+    do {
+      pos = randomPos();
+      attempts++;
+    } while (isOccupied(pos, true) && attempts < 300);
+    if (attempts < 300) dangerZones.push(pos);
   }
   updateFoodCount();
-
   drawGame();
 }
 
-// ===== مدیریت مرگ (قلب بینهایت) =====
 function handleDeath() {
   if (state.respawning) return;
   state.respawning = true;
@@ -912,17 +2097,16 @@ function handleDeath() {
     clearInterval(state.gameLoop);
     state.gameLoop = null;
   }
-
-  // قلب بینهایت، هیچوقت تموم نمیشه
-  const msg = `💚 قلب‌های شما بینهایت است! ادامه دهید!`;
-  alert(msg);
-
+  const gameOver = loseLife();
+  if (gameOver) {
+    endGame(false);
+    return;
+  }
   setTimeout(() => {
     respawnSnake();
   }, 300);
 }
 
-// ===== پایان بازی =====
 function endGame(won = false) {
   if (state.gameOver) return;
   state.gameOver = true;
@@ -932,59 +2116,89 @@ function endGame(won = false) {
     clearInterval(state.gameLoop);
     state.gameLoop = null;
   }
-  audio.pause();
-
+  bgMusic.pause();
   if (won) {
     resultIcon.className = "icon win";
     resultIcon.textContent = "🏆";
     resultTitle.className = "win";
-    resultTitle.textContent = "🎉 برنده شدی! 🎉";
+    resultTitle.textContent = t("you_won");
   } else {
     resultIcon.className = "icon lose";
     resultIcon.textContent = "☠️";
     resultTitle.className = "lose";
-    resultTitle.textContent = "Game Over";
+    resultTitle.textContent = t("game_over");
   }
-
-  finalScoreEl.textContent = "∞";
+  finalScoreEl.textContent = state.score;
   saveProgress();
   gameScreenEl.style.display = "none";
   gameOverEl.style.display = "block";
+  document.getElementById("snowContainer").style.opacity = "1";
 }
 
-// ===== شروع و بازگشت =====
+// ============================================================
+//  START GAME
+// ============================================================
 function startGame() {
-  const name = nameInput.value.trim() || "بازیکن";
+  const name = nameInput.value.trim() || "Player";
   state.playerName = name;
   playerNameDisplay.textContent = name;
+
+  document.getElementById("snowContainer").style.opacity = "0.15";
+
   menuEl.style.display = "none";
   gameOverEl.style.display = "none";
   gameScreenEl.style.display = "block";
+
   initGame();
   drawGame();
-  if (state.gameLoop) clearInterval(state.gameLoop);
-  state.gameLoop = setInterval(stepGame, state.speed);
-  playMusicIfLoaded();
-  updateCoinDisplay();
-  updateHeartsDisplay();
+
+  showCountdown(() => {
+    if (state.gameLoop) clearInterval(state.gameLoop);
+    state.gameLoop = setInterval(stepGame, state.speed);
+    playMusicIfLoaded();
+    updateAllDisplays();
+    updateHeartsDisplay();
+  });
 }
 
-function goToMenu() {
+function restartGameWithCountdown() {
   if (state.gameLoop) {
     clearInterval(state.gameLoop);
     state.gameLoop = null;
   }
   state.gameRunning = false;
-  audio.pause();
-  gameScreenEl.style.display = "none";
-  gameOverEl.style.display = "none";
-  menuEl.style.display = "block";
-  saveProgress();
+  state.paused = false;
+  pauseBtn.classList.remove("hidden");
+  resumeBtn.classList.add("hidden");
+
+  initGame();
+  drawGame();
+
+  showCountdown(() => {
+    if (state.gameLoop) clearInterval(state.gameLoop);
+    state.gameLoop = setInterval(stepGame, state.speed);
+    updateAllDisplays();
+    updateHeartsDisplay();
+  });
 }
 
-// ===== تغییر جهت =====
+restartGameBtn.addEventListener("click", function () {
+  if (state.gameRunning && !state.gameOver) {
+    if (confirm("Restart game?")) restartGameWithCountdown();
+  } else {
+    restartGameWithCountdown();
+  }
+});
+restartBtn.addEventListener("click", restartGameWithCountdown);
+playBtn.addEventListener("click", startGame);
+menuBtn.addEventListener("click", backToMenu);
+
+// ============================================================
+//  DIRECTION CONTROLS
+// ============================================================
 function changeDirection(dx, dy) {
-  if (!state.gameRunning || state.gameOver || state.respawning) return;
+  if (!state.gameRunning || state.gameOver || state.respawning || state.paused)
+    return;
   const dir = state.direction;
   if (
     (dx === 1 && dir.dx !== -1) ||
@@ -992,11 +2206,28 @@ function changeDirection(dx, dy) {
     (dy === 1 && dir.dy !== -1) ||
     (dy === -1 && dir.dy !== 1)
   ) {
-    state.direction = { dx, dy };
+    if (state.moveBuffer.length < 3) state.moveBuffer.push({ dx, dy });
   }
 }
 
-// ===== رویدادها =====
+function toggleSidebar() {
+  sidebar.classList.toggle("visible");
+  overlay.classList.toggle("visible");
+}
+toggleBtn.addEventListener("click", toggleSidebar);
+overlay.addEventListener("click", toggleSidebar);
+document.querySelectorAll(".sidebar-item").forEach((el) => {
+  el.addEventListener("click", function () {
+    const target = document.getElementById(this.dataset.target);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .querySelectorAll(".sidebar-item")
+      .forEach((i) => i.classList.remove("active"));
+    this.classList.add("active");
+    if (window.innerWidth <= 850) toggleSidebar();
+  });
+});
+
 document.addEventListener("keydown", (e) => {
   const key = e.key;
   if (key === "ArrowUp") {
@@ -1013,10 +2244,15 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
   } else if (key === " " || key === "Space") {
     e.preventDefault();
-    speedBtn.click();
+    if (state.paused) resumeGame();
+    else if (state.gameRunning && !state.gameOver) pauseGame();
+  } else if (key === "r" || key === "R") {
+    e.preventDefault();
+    if (state.gameRunning && !state.gameOver) {
+      if (confirm("Restart game?")) restartGameWithCountdown();
+    }
   }
 });
-
 document
   .getElementById("btnUp")
   .addEventListener("click", () => changeDirection(0, -1));
@@ -1029,7 +2265,6 @@ document
 document
   .getElementById("btnRight")
   .addEventListener("click", () => changeDirection(1, 0));
-
 ["btnUp", "btnDown", "btnLeft", "btnRight"].forEach((id) => {
   document.getElementById(id).addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -1037,22 +2272,23 @@ document
   });
 });
 
-playBtn.addEventListener("click", startGame);
-restartBtn.addEventListener("click", startGame);
-menuBtn.addEventListener("click", goToMenu);
 nameInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") startGame();
 });
-
+speedBtn.addEventListener("click", () => {
+  currentSpeedIndex = (currentSpeedIndex + 1) % SPEED_LEVELS.length;
+  updateSpeedDisplay();
+});
 window.addEventListener("keydown", (e) => {
   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key))
     e.preventDefault();
 });
 
-// ===== بارگذاری اولیه =====
 loadProgress();
+updateWheelHistory();
+updateWheelStats();
 buildColorOptions();
-updateCoinDisplay();
-buildHatShop();
-updateHatDisplay();
+updateAllTexts();
+updateAllDisplays();
 updateHeartsDisplay();
+updateSpeedDisplay();
