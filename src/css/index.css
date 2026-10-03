@@ -354,7 +354,6 @@ body {
   letter-spacing: 3px;
 }
 
-/* ===== CLOCK STYLES ===== */
 #clock-container {
   display: flex;
   align-items: center;
@@ -391,7 +390,6 @@ body {
   }
 }
 
-/* ===== WHEEL OF FORTUNE ===== */
 .wheel-section {
   background: rgba(0, 0, 0, 0.4);
   border-radius: 20px;
@@ -444,7 +442,6 @@ body {
 .wheel-toggle-btn:active {
   transform: scale(0.95);
 }
-
 .wheel-content {
   max-height: 0;
   overflow: hidden;
@@ -457,7 +454,6 @@ body {
   max-height: 800px;
   opacity: 1;
 }
-
 .wheel-wrapper {
   position: relative;
   width: 100%;
@@ -688,6 +684,64 @@ body {
   border-color: #fff;
   transform: scale(1.15);
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
+}
+.snake-shape-picker {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.snake-shape-option {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+.snake-shape-option:hover {
+  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.snake-shape-option.active {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.14);
+  transform: scale(1.1);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.18);
+}
+.screen-mode-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+.screen-mode-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.screen-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.screen-mode-btn.active {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.14);
+  color: #ffd700;
 }
 .shop-grid {
   display: flex;
@@ -926,32 +980,119 @@ body {
   margin-top: 14px;
   flex-wrap: wrap;
 }
-.controls {
+
+.controls-circle {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
   max-width: 200px;
+  position: relative;
 }
 .ctrl-btn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 14px;
-  font-size: 1.5rem;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 1.3rem;
   color: #fff;
   cursor: pointer;
-  transition: 0.1s;
+  transition: 0.08s;
   backdrop-filter: blur(4px);
+  -webkit-touch-callout: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1/1;
+  min-width: 44px;
+  min-height: 44px;
 }
 .ctrl-btn:active {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(0.92);
+  background: rgba(255, 215, 0, 0.25);
+  transform: scale(0.88);
+  border-color: rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
 }
 .ctrl-btn.empty {
   background: transparent;
   border: none;
   pointer-events: none;
+  box-shadow: none !important;
+  transform: none !important;
 }
+.ctrl-btn.center-btn {
+  background: rgba(255, 215, 0, 0.08);
+  border-color: rgba(255, 215, 0, 0.15);
+  font-size: 0.8rem;
+  color: rgba(255, 215, 0, 0.6);
+  cursor: default;
+}
+.ctrl-btn.center-btn:active {
+  transform: none;
+  background: rgba(255, 215, 0, 0.08);
+}
+.ctrl-btn.diagonal {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.05);
+  font-size: 1.2rem;
+}
+.ctrl-btn.diagonal:active {
+  background: rgba(100, 200, 255, 0.2);
+  border-color: rgba(100, 200, 255, 0.3);
+}
+
+/* درخواست جدید: فقط ظاهر کنترل‌های شکل و حالت صفحه، بدون تغییر چیدمان */
+.screen-mode-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.screen-mode-btn {
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.06)
+  );
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.28),
+    0 6px 14px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s,
+    background 0.15s;
+}
+.screen-mode-btn.active {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 215, 0, 0.45),
+    rgba(243, 156, 18, 0.25)
+  );
+  border-color: rgba(255, 215, 0, 0.55);
+}
+.screen-mode-btn:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.28),
+    0 3px 8px rgba(0, 0, 0, 0.16);
+}
+.snake-shape-option {
+  box-shadow:
+    0 5px 0 rgba(0, 0, 0, 0.28),
+    0 8px 16px rgba(0, 0, 0, 0.18);
+}
+.snake-shape-option:active {
+  transform: translateY(3px) scale(0.98);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.28),
+    0 4px 9px rgba(0, 0, 0, 0.16);
+}
+
 .speed-btn {
   background: linear-gradient(135deg, #ffd700, #f39c12);
   border: none;
@@ -1033,6 +1174,22 @@ body {
 .btn-pause.hidden,
 .btn-resume.hidden {
   display: none;
+}
+
+#adzButton {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 99999;
+  border: 0;
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
 #gameOver {
@@ -1219,6 +1376,16 @@ body {
     flex-direction: column;
     align-items: center;
   }
+  .controls-circle {
+    max-width: 160px;
+    gap: 4px;
+  }
+  .ctrl-btn {
+    padding: 10px;
+    font-size: 1.1rem;
+    min-width: 38px;
+    min-height: 38px;
+  }
 }
 @media (max-width: 500px) {
   .container {
@@ -1243,12 +1410,15 @@ body {
     padding: 13px 24px;
     font-size: 1.1rem;
   }
-  .ctrl-btn {
-    padding: 10px;
-    font-size: 1.2rem;
+  .controls-circle {
+    max-width: 130px;
+    gap: 3px;
   }
-  .controls {
-    max-width: 150px;
+  .ctrl-btn {
+    padding: 8px;
+    font-size: 1rem;
+    min-width: 34px;
+    min-height: 34px;
   }
   .setting-item select {
     min-width: 60px;
@@ -1328,4 +1498,99 @@ body {
   .wheel-section {
     padding: 12px 14px 16px 14px;
   }
+}
+
+button,
+.ctrl-btn {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 5px 0 rgba(0, 0, 0, 0.3),
+    0 8px 14px rgba(0, 0, 0, 0.22),
+    inset 0 1px 1px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+button:hover,
+.ctrl-btn:hover {
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.3),
+    0 10px 17px rgba(0, 0, 0, 0.24),
+    inset 0 1px 1px rgba(255, 255, 255, 0.34),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.16);
+}
+button:active,
+.ctrl-btn:active {
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.3),
+    0 4px 7px rgba(0, 0, 0, 0.2),
+    inset 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+body.screen-default {
+  background: linear-gradient(135deg, #4f7f57, #6f9f72, #4f7f57);
+  animation: none;
+}
+body.screen-day {
+  background: linear-gradient(135deg, #b8e6c1, #d9f3e3, #a9d9d2);
+  animation: none;
+}
+body.screen-night {
+  background: #05070d;
+  animation: none;
+}
+body.screen-default,
+body.screen-default button,
+body.screen-default input,
+body.screen-default select,
+body.screen-default textarea {
+  font-family:
+    "Noto Nastaliq Urdu", "Urdu Typesetting", "Noto Nastaliq", "Segoe UI",
+    Tahoma, Arial, sans-serif;
+}
+body.screen-day .container {
+  background: rgba(236, 255, 244, 0.88);
+  border-color: rgba(36, 95, 70, 0.16);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+}
+body.screen-day .top-stats,
+body.screen-day .menu-group,
+body.screen-day .wheel-section,
+body.screen-day .wheel-history,
+body.screen-day .music-controls button,
+body.screen-day .ctrl-btn,
+body.screen-day .sidebar-toggle {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body.screen-day .top-stats .stat-item,
+body.screen-day .music-controls button,
+body.screen-day .ctrl-btn {
+  color: #222;
+}
+body.screen-day #gameCanvas {
+  background: #eefaf2;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+  border-color: rgba(36, 95, 70, 0.16);
+}
+body.screen-day .setting-item label,
+body.screen-day .shop-item .item-name {
+  color: rgba(0, 0, 0, 0.68);
+}
+body.screen-day #nameInput,
+body.screen-day .setting-item select {
+  color: #222;
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.14);
+}
+body.screen-day .setting-item select option {
+  background: #fff;
+  color: #222;
+}
+body.screen-night {
+  color: #fff;
+}
+body.screen-night .container {
+  background: rgba(0, 0, 0, 0.72);
+}
+body.screen-night #gameCanvas {
+  background: #05070d;
 }

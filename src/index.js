@@ -1,29 +1,35 @@
 // ============================================================
-//  BACKGROUND MUSIC - آرامش‌بخش
+//  FOUR SONGS - AUTO PLAY / AUTO NEXT
 // ============================================================
-const bgMusic = new Audio(
-  "https://archive.org/download/once-again/once-again.mp3",
-);
-bgMusic.loop = true;
-bgMusic.volume = 0.5;
-let musicLoaded = false;
 
-bgMusic.addEventListener("canplaythrough", () => {
-  musicLoaded = true;
-  console.log("🎵 Music loaded!");
+import { musicTracks } from "./music";
+
+const bgMusic = new Audio();
+bgMusic.preload = "auto";
+bgMusic.volume = 0.5;
+let currentTrackIndex = 0;
+let musicStarted = false;
+
+function loadTrack(index) {
+  currentTrackIndex = (index + musicTracks.length) % musicTracks.length;
+  bgMusic.src = musicTracks[currentTrackIndex];
+  bgMusic.load();
+}
+
+bgMusic.addEventListener("ended", () => {
+  loadTrack(currentTrackIndex + 1);
+  bgMusic.play().catch(() => {});
 });
 
-bgMusic.addEventListener("error", (e) => {
-  console.log("⚠️ Music load error, using fallback...");
-  bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-  bgMusic.load();
+bgMusic.addEventListener("error", () => {
+  console.log("⚠️ خطا در بارگذاری آهنگ شماره " + (currentTrackIndex + 1));
 });
 
 document.getElementById("playMusicBtn").addEventListener("click", () => {
-  bgMusic.play().catch(() => {
-    setTimeout(() => bgMusic.play().catch(() => {}), 500);
-  });
+  musicStarted = true;
+  bgMusic.play().catch(() => {});
 });
+
 document
   .getElementById("pauseMusicBtn")
   .addEventListener("click", () => bgMusic.pause());
@@ -31,22 +37,18 @@ document.getElementById("volumeSlider").addEventListener("input", function () {
   bgMusic.volume = this.value / 100;
 });
 
+loadTrack(0);
+
 function playMusicIfLoaded() {
-  if (musicLoaded) {
-    bgMusic.play().catch(() => {});
-  } else {
-    bgMusic.addEventListener(
-      "canplaythrough",
-      () => {
-        bgMusic.play().catch(() => {});
-      },
-      { once: true },
-    );
-  }
+  musicStarted = true;
+  bgMusic.play().catch(() => {
+    // مرورگرهای موبایل صدا را تا اولین لمس/کلیک اجازه نمی‌دهند؛
+    // دکمه شروع بازی خودش همان تعامل کاربر است و آهنگ را شروع می‌کند.
+  });
 }
 
 // ============================================================
-//  CLOCK FUNCTION
+//  CLOCK
 // ============================================================
 function updateClock() {
   const now = new Date();
@@ -82,7 +84,7 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // ============================================================
-//  TOAST NOTIFICATION
+//  TOAST
 // ============================================================
 let toastTimeout = null;
 function showToast(message, type = "success") {
@@ -101,7 +103,7 @@ function showToast(message, type = "success") {
 }
 
 // ============================================================
-//  PAGE LOADING
+//  LOADING
 // ============================================================
 window.addEventListener("load", function () {
   setTimeout(function () {
@@ -186,7 +188,7 @@ const LANGUAGES = {
     glasses: "عینک",
     settings: "تنظیمات",
     music: "موسیقی",
-    play: "بازی",
+    play: "پخش",
     select_lang: "انتخاب زبان",
     player_name: "اسم بازیکن",
     snake_color: "رنگ مار",
@@ -549,7 +551,6 @@ function updateAllTexts() {
     .querySelectorAll("select option[data-i18n]")
     .forEach((opt) => (opt.textContent = t(opt.dataset.i18n)));
 
-  // به‌روزرسانی دکمه چرخ با تغییرات جدید
   updateSpinButtonState();
   wheelToggleBtn.innerHTML = wheelOpen
     ? '🔼 <span data-i18n="close">Close</span>'
@@ -599,6 +600,13 @@ const BG_COLORS = [
 
 let selectedColor = ALL_COLORS[0];
 let selectedBgColor = BG_COLORS[0];
+let selectedSnakeShape = "square";
+let selectedScreenMode = "default";
+const SCREEN_MODES = {
+  night: { name: "Night", code: "#0b1020", page: "night" },
+  day: { name: "Day", code: "#ffffff", page: "day" },
+  default: { name: "Default", code: "#4f7f57", page: "default" },
+};
 
 const HAT_SHOP = [
   {
@@ -731,7 +739,7 @@ let state = {
   gameOver: false,
   gameLoop: null,
   gameRunning: false,
-  speed: 140,
+  speed: 180,
   gridSize: 20,
   foodCount: 3,
   foodAnim: 0,
@@ -746,10 +754,10 @@ let CELL_SIZE = canvas.width / state.gridSize;
 let dangerZones = [];
 
 const SPEED_LEVELS = [
-  { value: 200, label: "easy" },
-  { value: 140, label: "medium" },
-  { value: 80, label: "hard" },
-  { value: 50, label: "very_hard" },
+  { value: 170, label: "easy" },
+  { value: 110, label: "medium" },
+  { value: 65, label: "hard" },
+  { value: 45, label: "very_hard" },
 ];
 let currentSpeedIndex = 1;
 
@@ -842,7 +850,7 @@ function getStatusText(item, owned, equipped) {
   return t("status_locked");
 }
 
-// ===== توابع فروشگاه =====
+// ===== فروشگاه =====
 function renderAllShops() {
   renderHatShop();
   renderGlassesShop();
@@ -866,11 +874,11 @@ function renderHatShop() {
     if (isEquipped) div.classList.add("selected");
 
     div.innerHTML = `
-            <span class="item-emoji">${item.emoji}</span>
-            <span class="item-name">${itemName}</span>
-            <span class="item-price">${priceText}</span>
-            <span class="item-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">${statusText}</span>
-        `;
+                  <span class="item-emoji">${item.emoji}</span>
+                  <span class="item-name">${itemName}</span>
+                  <span class="item-price">${priceText}</span>
+                  <span class="item-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">${statusText}</span>
+              `;
 
     div.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -898,11 +906,11 @@ function renderGlassesShop() {
     if (isEquipped) div.classList.add("selected");
 
     div.innerHTML = `
-            <span class="item-emoji">${item.emoji}</span>
-            <span class="item-name">${itemName}</span>
-            <span class="item-price">${priceText}</span>
-            <span class="item-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">${statusText}</span>
-        `;
+                  <span class="item-emoji">${item.emoji}</span>
+                  <span class="item-name">${itemName}</span>
+                  <span class="item-price">${priceText}</span>
+                  <span class="item-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">${statusText}</span>
+              `;
 
     div.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -1006,7 +1014,7 @@ function updateAllDisplays() {
   updateScore();
   updateHatDisplay();
   updateGlassesDisplay();
-  updateSpinButtonState(); // 🔥 به‌روزرسانی دکمه چرخ
+  updateSpinButtonState();
   saveProgress();
 }
 
@@ -1043,7 +1051,7 @@ function updateFoodCount() {
 }
 
 // ============================================================
-//  🆕 WHEEL OF FORTUNE با هزینه ۹۹۹ و شرط ۶۰۰ پول
+//  WHEEL OF FORTUNE
 // ============================================================
 const wheelCanvas = document.getElementById("wheelCanvas");
 const wheelCtx = wheelCanvas.getContext("2d");
@@ -1057,7 +1065,6 @@ const wheelSpinsBadge = document.getElementById("wheelSpinsBadge");
 const wheelToggleBtn = document.getElementById("wheelToggleBtn");
 const wheelContent = document.getElementById("wheelContent");
 
-// بخش‌های چرخ - ۵ قسمت با جوایز مختلف
 const wheelSegments = [
   { label: "💰 300", value: 300, color: "#e74c3c", emoji: "🪙" },
   { label: "💰 500", value: 500, color: "#f39c12", emoji: "💎" },
@@ -1072,10 +1079,9 @@ let wheelHistoryList = [];
 let spinCount = 0;
 let totalWon = 0;
 const MAX_SPINS = 999;
-const SPIN_COST = 999; // 💰 هزینه هر چرخش
-const MIN_COINS_TO_ACTIVATE = 600; // 🎯 شرط فعال شدن دکمه
+const SPIN_COST = 999;
+const MIN_COINS_TO_ACTIVATE = 600;
 
-// باز و بسته کردن چرخ
 let wheelOpen = false;
 wheelToggleBtn.addEventListener("click", function () {
   wheelOpen = !wheelOpen;
@@ -1086,7 +1092,6 @@ wheelToggleBtn.addEventListener("click", function () {
   updateAllTexts();
 });
 
-// رسم چرخ
 function drawWheel(rotation) {
   const centerX = wheelCanvas.width / 2;
   const centerY = wheelCanvas.height / 2;
@@ -1194,7 +1199,6 @@ function getWinningSegment(rotation) {
   return index % wheelSegments.length;
 }
 
-// 🔥 تابع بررسى پول کافى
 function canAffordSpin() {
   return totalCoins >= SPIN_COST;
 }
@@ -1203,7 +1207,6 @@ function isSpinButtonActive() {
   return totalCoins >= MIN_COINS_TO_ACTIVATE;
 }
 
-// 🆕 تابع به‌روزرسانى وضعیت دکمه چرخ
 function updateSpinButtonState() {
   const remaining = MAX_SPINS - spinCount;
   const hasEnoughCoins = canAffordSpin();
@@ -1220,14 +1223,14 @@ function updateSpinButtonState() {
 
   if (!canActivate) {
     spinBtn.disabled = true;
-    spinBtn.innerHTML = `🔒 نیاز به ${MIN_COINS_TO_ACTIVATE} پول (دارى ${totalCoins})`;
+    spinBtn.innerHTML = `🔒 Need ${MIN_COINS_TO_ACTIVATE} coins (you have ${totalCoins})`;
     spinBtn.style.opacity = "0.5";
     return;
   }
 
   if (!hasEnoughCoins) {
     spinBtn.disabled = true;
-    spinBtn.innerHTML = `❌ نیاز به ${SPIN_COST} پول (دارى ${totalCoins})`;
+    spinBtn.innerHTML = `❌ Need ${SPIN_COST} coins (you have ${totalCoins})`;
     spinBtn.style.opacity = "0.5";
     return;
   }
@@ -1243,7 +1246,6 @@ function updateWheelStats() {
   updateSpinButtonState();
 }
 
-// 🔥 چرخاندن چرخ با هزینه
 function spinWheel() {
   if (isSpinning) return;
   if (spinCount >= MAX_SPINS) {
@@ -1251,16 +1253,11 @@ function spinWheel() {
     return;
   }
 
-  // ✅ چک کن که پول کافى دارى؟
   if (!canAffordSpin()) {
-    showToast(
-      `❌ نیاز به ${SPIN_COST} پول دارى! (فقط ${totalCoins} پول دارى)`,
-      "error",
-    );
+    showToast(`❌ Need ${SPIN_COST} coins! (you have ${totalCoins})`, "error");
     return;
   }
 
-  // 💰 کم کردن هزینه
   totalCoins -= SPIN_COST;
   updateScore();
   updateAllDisplays();
@@ -1294,7 +1291,7 @@ function spinWheel() {
 
       spinCount++;
       totalWon += winAmount;
-      totalCoins += winAmount; // جایزه رو اضافه کن
+      totalCoins += winAmount;
       updateScore();
       updateAllDisplays();
       saveProgress();
@@ -1346,7 +1343,7 @@ drawWheel(0);
 updateWheelStats();
 
 // ============================================================
-//  ذخیره و بازیابی
+//  SAVE & LOAD
 // ============================================================
 function saveProgress() {
   try {
@@ -1359,6 +1356,8 @@ function saveProgress() {
       lives: currentLives,
       lang: currentLang,
       bgColor: selectedBgColor.code,
+      snakeShape: selectedSnakeShape,
+      screenMode: selectedScreenMode,
       wheelHistory: wheelHistoryList,
       spinCount: spinCount,
       totalWon: totalWon,
@@ -1391,6 +1390,14 @@ function loadProgress() {
       const found = BG_COLORS.find((c) => c.code === data.bgColor);
       if (found) selectedBgColor = found;
     }
+    if (data.snakeShape)
+      selectedSnakeShape = ["square", "diamond", "circle", "triangle"].includes(
+        data.snakeShape,
+      )
+        ? data.snakeShape
+        : "square";
+    // حالت شروع همیشه دیفالت سبز باشد؛ انتخاب شب/روز فقط در همان اجرای بازی اعمال می‌شود.
+    selectedScreenMode = "default";
     if (data.wheelHistory) wheelHistoryList = data.wheelHistory;
     if (data.spinCount !== undefined) spinCount = data.spinCount;
     if (data.totalWon !== undefined) totalWon = data.totalWon;
@@ -1403,7 +1410,25 @@ function loadProgress() {
   }
 }
 
+function applyScreenMode() {
+  const mode = SCREEN_MODES[selectedScreenMode] || SCREEN_MODES.default;
+  document.body.classList.remove(
+    "screen-default",
+    "screen-day",
+    "screen-night",
+  );
+  document.body.classList.add("screen-" + (mode.page || "default"));
+  // برای دیفالت، پس‌زمینهٔ بازی هم سبز باشد؛ روز سفید و شب کاملاً تیره.
+  if (selectedScreenMode === "default")
+    selectedBgColor = { name: "Default Green", code: "#18351f" };
+  if (selectedScreenMode === "day")
+    selectedBgColor = { name: "Day White", code: "#ffffff" };
+  if (selectedScreenMode === "night")
+    selectedBgColor = { name: "Night Dark", code: "#05070d" };
+}
+
 function buildColorOptions() {
+  applyScreenMode();
   const picker = document.getElementById("colorPicker");
   picker.innerHTML = "";
   ALL_COLORS.forEach((color, index) => {
@@ -1454,10 +1479,37 @@ function buildColorOptions() {
       el.classList.toggle("active", i === bgIndex);
     });
   }
+
+  document.querySelectorAll(".snake-shape-option").forEach((el) => {
+    el.classList.toggle("active", el.dataset.shape === selectedSnakeShape);
+    el.addEventListener("click", function () {
+      selectedSnakeShape = this.dataset.shape;
+      document
+        .querySelectorAll(".snake-shape-option")
+        .forEach((x) => x.classList.remove("active"));
+      this.classList.add("active");
+      saveProgress();
+      drawGame();
+    });
+  });
+
+  document.querySelectorAll(".screen-mode-btn").forEach((el) => {
+    el.classList.toggle("active", el.dataset.screenMode === selectedScreenMode);
+    el.addEventListener("click", function () {
+      selectedScreenMode = this.dataset.screenMode;
+      document
+        .querySelectorAll(".screen-mode-btn")
+        .forEach((x) => x.classList.remove("active"));
+      this.classList.add("active");
+      applyScreenMode();
+      drawGame();
+      saveProgress();
+    });
+  });
 }
 
 // ============================================================
-//  PAUSE / RESUME / BACK FUNCTIONS
+//  PAUSE / RESUME / BACK
 // ============================================================
 function pauseGame() {
   if (state.gameOver || !state.gameRunning) return;
@@ -1500,7 +1552,9 @@ function backToMenu() {
 }
 
 function drawPauseScreen() {
-  ctx.fillStyle = selectedBgColor.code;
+  const activeScreenMode =
+    SCREEN_MODES[selectedScreenMode] || SCREEN_MODES.default;
+  ctx.fillStyle = activeScreenMode.code || selectedBgColor.code;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "rgba(0,0,0,0.5)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1538,24 +1592,36 @@ backMenuBtn.addEventListener("click", function () {
 //  DRAWING FUNCTIONS
 // ============================================================
 function drawAccessories(x, y, size) {
+  // ===== کلاه =====
   const hat = HAT_SHOP.find((h) => h.id === equippedHat);
   if (hat && hat.id !== "none") {
-    ctx.font = `${size * 1.0}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+    ctx.font = `${size * 0.9}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.shadowColor = "rgba(255,255,255,0.2)";
     ctx.shadowBlur = 15;
-    ctx.fillText(hat.emoji, x + size / 2, y - 1);
+    ctx.fillText(hat.emoji, x + size / 2, y - 2);
     ctx.shadowBlur = 0;
   }
+
+  // ===== عینک - دقیقاً روی چشم‌ها =====
   const glasses = GLASSES_SHOP.find((g) => g.id === equippedGlasses);
   if (glasses && glasses.id !== "none_g") {
-    ctx.font = `${size * 0.55}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+    // چشم‌ها در حدود 25٪ بالای سلول قرار دارند
+    const eyeY = y + size * 0.25;
+    const fontSize = size * 0.55;
+
+    ctx.font = `${fontSize}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.shadowColor = "rgba(255,255,255,0.15)";
-    ctx.shadowBlur = 10;
-    ctx.fillText(glasses.emoji, x + size / 2, y + size / 2 - 2);
+    ctx.shadowColor = "rgba(255,255,255,0.2)";
+    ctx.shadowBlur = 12;
+
+    // برای عینک‌های آفتابی و مطالعه، کمی بزرگتر
+    if (glasses.id === "sunglasses" || glasses.id === "reading") {
+      ctx.font = `${size * 0.7}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+    }
+    ctx.fillText(glasses.emoji, x + size / 2, eyeY + 1);
     ctx.shadowBlur = 0;
   }
 }
@@ -1633,12 +1699,66 @@ function drawDangerZones() {
   }
 }
 
+let smoothRenderRaf = null;
+let renderStartTime = performance.now();
+let renderDuration = 80;
+
+function beginSmoothRender(previousSnake) {
+  state.renderPrevSnake =
+    previousSnake || state.snake.map((seg) => ({ ...seg }));
+  renderStartTime = performance.now();
+  renderDuration = Math.max(90, Math.min(160, state.speed * 0.88));
+  if (!smoothRenderRaf)
+    smoothRenderRaf = requestAnimationFrame(smoothRenderFrame);
+}
+
+function smoothAxis(a, b, max) {
+  let start = a;
+  let diff = b - start;
+  if (Math.abs(diff) > max / 2) start += diff > 0 ? max : -max;
+  return start;
+}
+
+function getSmoothSnakeSegments() {
+  const current = state.snake || [];
+  const previous = state.renderPrevSnake || [];
+  const p = Math.min(1, (performance.now() - renderStartTime) / renderDuration);
+  const eased = 1 - Math.pow(1 - p, 3);
+  return current.map((seg, i) => {
+    const prev = previous[i] || seg;
+    let x = smoothAxis(prev.x, seg.x, state.gridSize);
+    let y = smoothAxis(prev.y, seg.y, state.gridSize);
+    x += (seg.x - x) * eased;
+    y += (seg.y - y) * eased;
+    x = ((x % state.gridSize) + state.gridSize) % state.gridSize;
+    y = ((y % state.gridSize) + state.gridSize) % state.gridSize;
+    return { x, y };
+  });
+}
+
+function smoothRenderFrame() {
+  smoothRenderRaf = null;
+  if (
+    gameScreenEl.style.display !== "none" &&
+    state.gameRunning &&
+    !state.paused &&
+    !state.gameOver
+  ) {
+    drawGame();
+    if (performance.now() - renderStartTime < renderDuration)
+      smoothRenderRaf = requestAnimationFrame(smoothRenderFrame);
+  }
+}
+
 function drawGame() {
   if (state.paused) {
     drawPauseScreen();
     return;
   }
-  ctx.fillStyle = selectedBgColor.code;
+  const activeScreenMode =
+    SCREEN_MODES[selectedScreenMode] || SCREEN_MODES.default;
+  const canvasBg = activeScreenMode.code || selectedBgColor.code;
+  ctx.fillStyle = canvasBg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const foodEmojis = getFoodEmojis();
@@ -1663,7 +1783,7 @@ function drawGame() {
   drawDangerZones();
 
   const snakeColor = state.snakeColor;
-  const segments = state.snake;
+  const segments = getSmoothSnakeSegments();
   const len = segments.length;
   const size = CELL_SIZE;
   for (let i = 0; i < len; i++) {
@@ -1685,49 +1805,52 @@ function drawGame() {
     const rectSize = size - pad * 2;
     const radius = 4;
     ctx.beginPath();
-    ctx.moveTo(x + pad + radius, y + pad);
-    ctx.lineTo(x + pad + rectSize - radius, y + pad);
-    ctx.quadraticCurveTo(
-      x + pad + rectSize,
-      y + pad,
-      x + pad + rectSize,
-      y + pad + radius,
-    );
-    ctx.lineTo(x + pad + rectSize, y + pad + rectSize - radius);
-    ctx.quadraticCurveTo(
-      x + pad + rectSize,
-      y + pad + rectSize,
-      x + pad + rectSize - radius,
-      y + pad + rectSize,
-    );
-    ctx.lineTo(x + pad + radius, y + pad + rectSize);
-    ctx.quadraticCurveTo(
-      x + pad,
-      y + pad + rectSize,
-      x + pad,
-      y + pad + rectSize - radius,
-    );
-    ctx.lineTo(x + pad, y + pad + radius);
-    ctx.quadraticCurveTo(x + pad, y + pad, x + pad + radius, y + pad);
-    ctx.closePath();
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const inset = 2.2;
+    if (selectedSnakeShape === "circle") {
+      ctx.arc(cx, cy, size / 2 - inset, 0, Math.PI * 2);
+    } else if (selectedSnakeShape === "diamond") {
+      ctx.moveTo(cx, y + inset);
+      ctx.lineTo(x + size - inset, cy);
+      ctx.lineTo(cx, y + size - inset);
+      ctx.lineTo(x + inset, cy);
+      ctx.closePath();
+    } else if (selectedSnakeShape === "triangle") {
+      ctx.moveTo(cx, y + inset);
+      ctx.lineTo(x + size - inset, y + size - inset);
+      ctx.lineTo(x + inset, y + size - inset);
+      ctx.closePath();
+    } else {
+      const r = Math.min(5, size * 0.18);
+      ctx.moveTo(x + pad + r, y + pad);
+      ctx.lineTo(x + pad + rectSize - r, y + pad);
+      ctx.quadraticCurveTo(
+        x + pad + rectSize,
+        y + pad,
+        x + pad + rectSize,
+        y + pad + r,
+      );
+      ctx.lineTo(x + pad + rectSize, y + pad + rectSize - r);
+      ctx.quadraticCurveTo(
+        x + pad + rectSize,
+        y + pad + rectSize,
+        x + pad + rectSize - r,
+        y + pad + rectSize,
+      );
+      ctx.lineTo(x + pad + r, y + pad + rectSize);
+      ctx.quadraticCurveTo(
+        x + pad,
+        y + pad + rectSize,
+        x + pad,
+        y + pad + rectSize - r,
+      );
+      ctx.lineTo(x + pad, y + pad + r);
+      ctx.quadraticCurveTo(x + pad, y + pad, x + pad + r, y + pad);
+      ctx.closePath();
+    }
     ctx.fillStyle = color;
     ctx.fill();
-    if (i > 0) {
-      const prev = segments[i - 1];
-      const dx = seg.x - prev.x;
-      const dy = seg.y - prev.y;
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = color;
-      if (dx === 1) {
-        ctx.fillRect(prev.x * size + size - 2, prev.y * size + 3, 4, size - 6);
-      } else if (dx === -1) {
-        ctx.fillRect(seg.x * size + size - 2, seg.y * size + 3, 4, size - 6);
-      } else if (dy === 1) {
-        ctx.fillRect(prev.x * size + 3, prev.y * size + size - 2, size - 6, 4);
-      } else if (dy === -1) {
-        ctx.fillRect(seg.x * size + 3, seg.y * size + size - 2, size - 6, 4);
-      }
-    }
     ctx.shadowBlur = 0;
     if (isHead) {
       ctx.strokeStyle = "rgba(255,255,255,0.25)";
@@ -1764,159 +1887,81 @@ function drawGame() {
       ctx.stroke();
       drawAccessories(x, y, size);
       const eyeSize = size * 0.18;
-      const eyeOff = size * 0.25;
       const d = state.direction;
       ctx.shadowBlur = 0;
       ctx.fillStyle = "#fff";
       ctx.shadowColor = "rgba(255,255,255,0.15)";
       ctx.shadowBlur = 6;
-      if (d.dx === 1) {
-        ctx.fillRect(
-          x + size - eyeOff - 2,
-          y + 5,
-          eyeSize * 1.3,
-          eyeSize * 1.4,
-        );
-        ctx.fillRect(
-          x + size - eyeOff - 2,
-          y + size - 5 - eyeSize * 1.4,
-          eyeSize * 1.3,
-          eyeSize * 1.4,
-        );
+
+      const angle = Math.atan2(d.dy, d.dx);
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      const eyeDist = size * 0.3;
+
+      const offsets = [
+        { x: -eyeDist * 0.6, y: -eyeDist * 0.6 },
+        { x: eyeDist * 0.6, y: -eyeDist * 0.6 },
+      ];
+
+      for (let oi = 0; oi < offsets.length; oi++) {
+        const ox = x + size / 2 + offsets[oi].x * cosA - offsets[oi].y * sinA;
+        const oy = y + size / 2 + offsets[oi].x * sinA + offsets[oi].y * cosA;
+        const ex = ox - eyeSize / 2;
+        const ey = oy - eyeSize / 2;
+
+        ctx.fillStyle = "#fff";
+        ctx.shadowBlur = 6;
+        ctx.fillRect(ex, ey, eyeSize, eyeSize * 1.2);
+
         ctx.fillStyle = "#1a1a2e";
         ctx.shadowBlur = 0;
+        const pupilX = ex + eyeSize * 0.3 + d.dx * 0.12 * eyeSize;
+        const pupilY = ey + eyeSize * 0.2 + d.dy * 0.12 * eyeSize;
+        ctx.fillRect(pupilX, pupilY, eyeSize * 0.5, eyeSize * 0.6);
+
+        ctx.fillStyle = "rgba(255,255,255,0.6)";
         ctx.fillRect(
-          x + size - eyeOff + 2,
-          y + 8,
-          eyeSize * 0.6,
-          eyeSize * 0.7,
-        );
-        ctx.fillRect(
-          x + size - eyeOff + 2,
-          y + size - 8 - eyeSize * 0.7,
-          eyeSize * 0.6,
-          eyeSize * 0.7,
-        );
-        ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(
-          x + size - eyeOff + 0,
-          y + 6,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
-        );
-        ctx.fillRect(
-          x + size - eyeOff + 0,
-          y + size - 6 - eyeSize * 0.25,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
-        );
-      } else if (d.dx === -1) {
-        ctx.fillRect(
-          x + eyeOff - eyeSize * 1.3,
-          y + 5,
-          eyeSize * 1.3,
-          eyeSize * 1.4,
-        );
-        ctx.fillRect(
-          x + eyeOff - eyeSize * 1.3,
-          y + size - 5 - eyeSize * 1.4,
-          eyeSize * 1.3,
-          eyeSize * 1.4,
-        );
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.fillRect(
-          x + eyeOff - eyeSize * 0.6 - 2,
-          y + 8,
-          eyeSize * 0.6,
-          eyeSize * 0.7,
-        );
-        ctx.fillRect(
-          x + eyeOff - eyeSize * 0.6 - 2,
-          y + size - 8 - eyeSize * 0.7,
-          eyeSize * 0.6,
-          eyeSize * 0.7,
-        );
-        ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(
-          x + eyeOff - eyeSize * 0.25 - 1,
-          y + 6,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
-        );
-        ctx.fillRect(
-          x + eyeOff - eyeSize * 0.25 - 1,
-          y + size - 6 - eyeSize * 0.25,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
-        );
-      } else if (d.dy === -1) {
-        ctx.fillRect(x + 5, y + eyeOff - 2, eyeSize * 1.4, eyeSize * 1.3);
-        ctx.fillRect(
-          x + size - 5 - eyeSize * 1.4,
-          y + eyeOff - 2,
-          eyeSize * 1.4,
-          eyeSize * 1.3,
-        );
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.fillRect(x + 8, y + eyeOff + 2, eyeSize * 0.7, eyeSize * 0.6);
-        ctx.fillRect(
-          x + size - 8 - eyeSize * 0.7,
-          y + eyeOff + 2,
-          eyeSize * 0.7,
-          eyeSize * 0.6,
-        );
-        ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(x + 6, y + eyeOff + 0, eyeSize * 0.25, eyeSize * 0.25);
-        ctx.fillRect(
-          x + size - 6 - eyeSize * 0.25,
-          y + eyeOff + 0,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
-        );
-      } else {
-        ctx.fillRect(
-          x + 5,
-          y + size - eyeOff - eyeSize * 1.3 + 2,
-          eyeSize * 1.4,
-          eyeSize * 1.3,
-        );
-        ctx.fillRect(
-          x + size - 5 - eyeSize * 1.4,
-          y + size - eyeOff - eyeSize * 1.3 + 2,
-          eyeSize * 1.4,
-          eyeSize * 1.3,
-        );
-        ctx.fillStyle = "#1a1a2e";
-        ctx.shadowBlur = 0;
-        ctx.fillRect(
-          x + 8,
-          y + size - eyeOff - eyeSize * 0.6 - 2,
-          eyeSize * 0.7,
-          eyeSize * 0.6,
-        );
-        ctx.fillRect(
-          x + size - 8 - eyeSize * 0.7,
-          y + size - eyeOff - eyeSize * 0.6 - 2,
-          eyeSize * 0.7,
-          eyeSize * 0.6,
-        );
-        ctx.fillStyle = "rgba(255,255,255,0.7)";
-        ctx.fillRect(
-          x + 6,
-          y + size - eyeOff - eyeSize * 0.25 - 1,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
-        );
-        ctx.fillRect(
-          x + size - 6 - eyeSize * 0.25,
-          y + size - eyeOff - eyeSize * 0.25 - 1,
-          eyeSize * 0.25,
-          eyeSize * 0.25,
+          pupilX + eyeSize * 0.1,
+          pupilY + eyeSize * 0.05,
+          eyeSize * 0.15,
+          eyeSize * 0.2,
         );
       }
       ctx.shadowBlur = 0;
+
+      // ===== نیش‌های بیشتر، بدون زبان و بدون دهان =====
+      const headCx = x + size / 2;
+      const headCy = y + size / 2;
+      const headAngle = Math.atan2(d.dy, d.dx);
+
+      ctx.save();
+      ctx.translate(headCx, headCy);
+      ctx.rotate(headAngle);
+
+      // شش نیش سفید کوچک و مرتب
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "rgba(255,255,255,0.65)";
+      ctx.shadowBlur = 3;
+      const fangXs = [
+        size * 0.19,
+        size * 0.25,
+        size * 0.31,
+        size * 0.37,
+        size * 0.43,
+        size * 0.49,
+      ];
+      for (let fi = 0; fi < fangXs.length; fi++) {
+        const fx = fangXs[fi];
+        const fy = fi % 2 === 0 ? size * 0.185 : size * 0.17;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy);
+        ctx.lineTo(fx + size * 0.022, fy + size * 0.105);
+        ctx.lineTo(fx + size * 0.044, fy);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+      ctx.restore();
     }
   }
 }
@@ -1943,6 +1988,7 @@ function respawnSnake() {
     { x: startX - 1, y: startY },
     { x: startX - 2, y: startY },
   ];
+  state.renderPrevSnake = state.snake.map((seg) => ({ ...seg }));
   state.direction = { dx: 1, dy: 0 };
   state.moveBuffer = [];
   state.food = [];
@@ -1972,6 +2018,7 @@ function initGame() {
     { x: startX - 1, y: startY },
     { x: startX - 2, y: startY },
   ];
+  state.renderPrevSnake = state.snake.map((seg) => ({ ...seg }));
   state.direction = { dx: 1, dy: 0 };
   state.moveBuffer = [];
   state.score = 0;
@@ -1998,18 +2045,17 @@ function initGame() {
 function stepGame() {
   if (state.gameOver || !state.gameRunning || state.respawning || state.paused)
     return;
+
   if (state.moveBuffer.length > 0) {
     const nextMove = state.moveBuffer.shift();
     const dir = state.direction;
-    if (
-      (nextMove.dx === 1 && dir.dx !== -1) ||
-      (nextMove.dx === -1 && dir.dx !== 1) ||
-      (nextMove.dy === 1 && dir.dy !== -1) ||
-      (nextMove.dy === -1 && dir.dy !== 1)
-    ) {
+    if (!(nextMove.dx === -dir.dx && nextMove.dy === -dir.dy)) {
       state.direction = nextMove;
     }
+    state.moveBuffer = [];
   }
+
+  const previousSnakeForRender = state.snake.map((seg) => ({ ...seg }));
   const head = state.snake[0];
   let newHead = {
     x: head.x + state.direction.dx,
@@ -2086,6 +2132,7 @@ function stepGame() {
     if (attempts < 300) dangerZones.push(pos);
   }
   updateFoodCount();
+  beginSmoothRender(previousSnakeForRender);
   drawGame();
 }
 
@@ -2117,6 +2164,7 @@ function endGame(won = false) {
     state.gameLoop = null;
   }
   bgMusic.pause();
+
   if (won) {
     resultIcon.className = "icon win";
     resultIcon.textContent = "🏆";
@@ -2150,7 +2198,9 @@ function startGame() {
   gameScreenEl.style.display = "block";
 
   initGame();
+  beginSmoothRender(state.snake.map((seg) => ({ ...seg })));
   drawGame();
+  playMusicIfLoaded();
 
   showCountdown(() => {
     if (state.gameLoop) clearInterval(state.gameLoop);
@@ -2168,48 +2218,208 @@ function restartGameWithCountdown() {
   }
   state.gameRunning = false;
   state.paused = false;
-  pauseBtn.classList.remove("hidden");
-  resumeBtn.classList.add("hidden");
+  state.gameOver = false;
+
+  gameOverEl.style.display = "none";
+  gameScreenEl.style.display = "block";
 
   initGame();
+  beginSmoothRender(state.snake.map((seg) => ({ ...seg })));
   drawGame();
+  playMusicIfLoaded();
 
   showCountdown(() => {
     if (state.gameLoop) clearInterval(state.gameLoop);
     state.gameLoop = setInterval(stepGame, state.speed);
     updateAllDisplays();
     updateHeartsDisplay();
+    playMusicIfLoaded();
   });
 }
 
 restartGameBtn.addEventListener("click", function () {
-  if (state.gameRunning && !state.gameOver) {
-    if (confirm("Restart game?")) restartGameWithCountdown();
+  if (state.gameRunning && !state.gameOver && !state.paused) {
+    if (confirm("Restart game?")) {
+      restartGameWithCountdown();
+    }
   } else {
     restartGameWithCountdown();
   }
 });
-restartBtn.addEventListener("click", restartGameWithCountdown);
+
+restartBtn.addEventListener("click", function () {
+  restartGameWithCountdown();
+});
+
 playBtn.addEventListener("click", startGame);
 menuBtn.addEventListener("click", backToMenu);
 
 // ============================================================
-//  DIRECTION CONTROLS
+//  DIRECTION CONTROLS - 8 جهته دایره‌ای
 // ============================================================
 function changeDirection(dx, dy) {
   if (!state.gameRunning || state.gameOver || state.respawning || state.paused)
     return;
   const dir = state.direction;
-  if (
-    (dx === 1 && dir.dx !== -1) ||
-    (dx === -1 && dir.dx !== 1) ||
-    (dy === 1 && dir.dy !== -1) ||
-    (dy === -1 && dir.dy !== 1)
-  ) {
-    if (state.moveBuffer.length < 3) state.moveBuffer.push({ dx, dy });
-  }
+
+  if (dx === -dir.dx && dy === -dir.dy) return;
+
+  state.moveBuffer = [{ dx, dy }];
 }
 
+const directionMap = {
+  btnUp: { dx: 0, dy: -1 },
+  btnDown: { dx: 0, dy: 1 },
+  btnLeft: { dx: -1, dy: 0 },
+  btnRight: { dx: 1, dy: 0 },
+  btnUpLeft: { dx: -1, dy: -1 },
+  btnUpRight: { dx: 1, dy: -1 },
+  btnDownLeft: { dx: -1, dy: 1 },
+  btnDownRight: { dx: 1, dy: 1 },
+};
+
+function setupDirectionButton(id, dx, dy) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  let intervalId = null;
+
+  const action = (e) => {
+    e.preventDefault();
+    changeDirection(dx, dy);
+  };
+
+  el.addEventListener("click", action);
+
+  el.addEventListener(
+    "touchstart",
+    (e) => {
+      e.preventDefault();
+      changeDirection(dx, dy);
+      clearInterval(intervalId);
+      intervalId = setInterval(() => changeDirection(dx, dy), 100);
+    },
+    { passive: false },
+  );
+
+  el.addEventListener(
+    "touchend",
+    (e) => {
+      e.preventDefault();
+      clearInterval(intervalId);
+      intervalId = null;
+    },
+    { passive: false },
+  );
+
+  el.addEventListener("touchcancel", () => {
+    clearInterval(intervalId);
+    intervalId = null;
+  });
+
+  el.addEventListener("mousedown", () => {
+    changeDirection(dx, dy);
+    clearInterval(intervalId);
+    intervalId = setInterval(() => changeDirection(dx, dy), 100);
+  });
+
+  el.addEventListener("mouseup", () => {
+    clearInterval(intervalId);
+    intervalId = null;
+  });
+
+  el.addEventListener("mouseleave", () => {
+    clearInterval(intervalId);
+    intervalId = null;
+  });
+}
+
+for (const [id, dir] of Object.entries(directionMap)) {
+  setupDirectionButton(id, dir.dx, dir.dy);
+}
+
+document.addEventListener("keydown", (e) => {
+  const key = e.key;
+  if (
+    [
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      " ",
+      "Space",
+      "r",
+      "R",
+      "w",
+      "W",
+      "a",
+      "A",
+      "s",
+      "S",
+      "d",
+      "D",
+      "q",
+      "Q",
+      "e",
+      "E",
+      "z",
+      "Z",
+      "x",
+      "X",
+      "c",
+      "C",
+    ].includes(key)
+  ) {
+    e.preventDefault();
+  }
+
+  if (key === "ArrowUp") {
+    changeDirection(0, -1);
+  } else if (key === "ArrowDown") {
+    changeDirection(0, 1);
+  } else if (key === "ArrowLeft") {
+    changeDirection(-1, 0);
+  } else if (key === "ArrowRight") {
+    changeDirection(1, 0);
+  } else if (key === "w" || key === "W") {
+    changeDirection(0, -1);
+  } else if (key === "s" || key === "S") {
+    changeDirection(0, 1);
+  } else if (key === "a" || key === "A") {
+    changeDirection(-1, 0);
+  } else if (key === "d" || key === "D") {
+    changeDirection(1, 0);
+  } else if (key === "q" || key === "Q") {
+    changeDirection(-1, -1);
+  } else if (key === "e" || key === "E") {
+    changeDirection(1, -1);
+  } else if (key === "z" || key === "Z") {
+    changeDirection(-1, 1);
+  } else if (key === "x" || key === "X") {
+    changeDirection(1, 1);
+  } else if (key === " " || key === "Space") {
+    if (state.paused) resumeGame();
+    else if (state.gameRunning && !state.gameOver) pauseGame();
+  } else if (key === "r" || key === "R") {
+    if (state.gameRunning && !state.gameOver) {
+      if (confirm("Restart game?")) restartGameWithCountdown();
+    } else if (state.gameOver) {
+      restartGameWithCountdown();
+    }
+  }
+});
+
+nameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") startGame();
+});
+speedBtn.addEventListener("click", () => {
+  currentSpeedIndex = (currentSpeedIndex + 1) % SPEED_LEVELS.length;
+  updateSpeedDisplay();
+});
+
+// ============================================================
+//  SIDEBAR
+// ============================================================
 function toggleSidebar() {
   sidebar.classList.toggle("visible");
   overlay.classList.toggle("visible");
@@ -2228,62 +2438,9 @@ document.querySelectorAll(".sidebar-item").forEach((el) => {
   });
 });
 
-document.addEventListener("keydown", (e) => {
-  const key = e.key;
-  if (key === "ArrowUp") {
-    changeDirection(0, -1);
-    e.preventDefault();
-  } else if (key === "ArrowDown") {
-    changeDirection(0, 1);
-    e.preventDefault();
-  } else if (key === "ArrowLeft") {
-    changeDirection(-1, 0);
-    e.preventDefault();
-  } else if (key === "ArrowRight") {
-    changeDirection(1, 0);
-    e.preventDefault();
-  } else if (key === " " || key === "Space") {
-    e.preventDefault();
-    if (state.paused) resumeGame();
-    else if (state.gameRunning && !state.gameOver) pauseGame();
-  } else if (key === "r" || key === "R") {
-    e.preventDefault();
-    if (state.gameRunning && !state.gameOver) {
-      if (confirm("Restart game?")) restartGameWithCountdown();
-    }
-  }
-});
-document
-  .getElementById("btnUp")
-  .addEventListener("click", () => changeDirection(0, -1));
-document
-  .getElementById("btnDown")
-  .addEventListener("click", () => changeDirection(0, 1));
-document
-  .getElementById("btnLeft")
-  .addEventListener("click", () => changeDirection(-1, 0));
-document
-  .getElementById("btnRight")
-  .addEventListener("click", () => changeDirection(1, 0));
-["btnUp", "btnDown", "btnLeft", "btnRight"].forEach((id) => {
-  document.getElementById(id).addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    document.getElementById(id).click();
-  });
-});
-
-nameInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") startGame();
-});
-speedBtn.addEventListener("click", () => {
-  currentSpeedIndex = (currentSpeedIndex + 1) % SPEED_LEVELS.length;
-  updateSpeedDisplay();
-});
-window.addEventListener("keydown", (e) => {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key))
-    e.preventDefault();
-});
-
+// ============================================================
+//  INIT
+// ============================================================
 loadProgress();
 updateWheelHistory();
 updateWheelStats();
@@ -2292,3 +2449,10 @@ updateAllTexts();
 updateAllDisplays();
 updateHeartsDisplay();
 updateSpeedDisplay();
+
+console.log("🐍 Snake Game Mega Original - 8 Direction Control!");
+console.log("🎮 Controls:");
+console.log("   ⬆️⬇️⬅️➡️  - Arrow keys or WASD");
+console.log("   ↖️↗️↙️↘️  - Q/E/Z/X for diagonal movement");
+console.log("⏸ Space to pause/resume");
+console.log("🔄 R to restart");

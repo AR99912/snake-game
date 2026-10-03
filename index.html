@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>🐍 Snake Game Mega Original 🐍</title>
+    <title>🐍Snake Game Full Original🐍</title>
     <link
       rel="shortcut icon"
       href="./favicon.ico"
@@ -18,6 +18,15 @@
     />
   </head>
   <body>
+    <!-- ===== ADZ BUTTON ===== -->
+    <button
+      id="adzButton"
+      type="button"
+      onclick="alert('باید 1000000 $ بدی وگرنه هیچی 🚫')"
+    >
+      Ads 🚫
+    </button>
+
     <!-- ===== TOAST ===== -->
     <div
       class="toast"
@@ -131,7 +140,6 @@
         <div id="menu">
           <h1>🐍 Snake Game Mega Original 🐍</h1>
 
-          <!-- ===== CLOCK ===== -->
           <div id="clock-container">
             <span class="clock-icon">🕐</span>
             <span
@@ -141,7 +149,6 @@
             >
           </div>
 
-          <!-- ===== WHEEL OF FORTUNE ===== -->
           <div
             class="wheel-section"
             id="section-wheel"
@@ -264,6 +271,45 @@
           </div>
           <div
             class="menu-group"
+            id="section-shape"
+          >
+            <label>🔷 شکل مار</label>
+            <div
+              class="snake-shape-picker"
+              id="snakeShapePicker"
+            >
+              <button
+                type="button"
+                class="snake-shape-option active"
+                data-shape="square"
+              >
+                ⬜
+              </button>
+              <button
+                type="button"
+                class="snake-shape-option"
+                data-shape="diamond"
+              >
+                🔶
+              </button>
+              <button
+                type="button"
+                class="snake-shape-option"
+                data-shape="circle"
+              >
+                ⚪
+              </button>
+              <button
+                type="button"
+                class="snake-shape-option"
+                data-shape="triangle"
+              >
+                🔺
+              </button>
+            </div>
+          </div>
+          <div
+            class="menu-group"
             id="section-color"
           >
             <label>🎨 <span data-i18n="snake_color">Snake Color</span></label>
@@ -324,6 +370,38 @@
             id="section-settings"
           >
             <label>⚙️ <span data-i18n="settings_title">Settings</span></label>
+            <div
+              class="setting-item"
+              style="width: 100%; margin-bottom: 8px"
+            >
+              <label>🌓 حالت صفحه</label>
+              <div
+                class="screen-mode-row"
+                id="screenModeRow"
+              >
+                <button
+                  type="button"
+                  class="screen-mode-btn"
+                  data-screen-mode="night"
+                >
+                  🌙 شب
+                </button>
+                <button
+                  type="button"
+                  class="screen-mode-btn"
+                  data-screen-mode="day"
+                >
+                  ☀️ روز
+                </button>
+                <button
+                  type="button"
+                  class="screen-mode-btn active"
+                  data-screen-mode="default"
+                >
+                  🖥️ پیشفرض
+                </button>
+              </div>
+            </div>
             <div class="setting-row">
               <div class="setting-item">
                 <label data-i18n="speed">Speed</label>
@@ -335,7 +413,7 @@
                     Easy
                   </option>
                   <option
-                    value="140"
+                    value="85"
                     selected
                     data-i18n="medium"
                   >
@@ -495,20 +573,46 @@
             >
           </div>
           <div class="controls-wrapper">
-            <div class="controls">
-              <div class="ctrl-btn empty"></div>
+            <div
+              class="controls-circle"
+              id="controlsCircle"
+            >
+              <div
+                class="ctrl-btn diagonal"
+                id="btnUpLeft"
+              >
+                ↖️
+              </div>
               <div
                 class="ctrl-btn"
                 id="btnUp"
               >
                 ⬆️
               </div>
-              <div class="ctrl-btn empty"></div>
+              <div
+                class="ctrl-btn diagonal"
+                id="btnUpRight"
+              >
+                ↗️
+              </div>
               <div
                 class="ctrl-btn"
                 id="btnLeft"
               >
                 ⬅️
+              </div>
+              <div class="ctrl-btn center-btn">🐍</div>
+              <div
+                class="ctrl-btn"
+                id="btnRight"
+              >
+                ➡️
+              </div>
+              <div
+                class="ctrl-btn diagonal"
+                id="btnDownLeft"
+              >
+                ↙️
               </div>
               <div
                 class="ctrl-btn"
@@ -517,10 +621,10 @@
                 ⬇️
               </div>
               <div
-                class="ctrl-btn"
-                id="btnRight"
+                class="ctrl-btn diagonal"
+                id="btnDownRight"
               >
-                ➡️
+                ↘️
               </div>
             </div>
             <button
