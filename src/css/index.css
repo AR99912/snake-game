@@ -1,0 +1,816 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  animation: rainbowBG 8s ease-in-out infinite alternate;
+  background-size: 400% 400%;
+}
+
+@keyframes rainbowBG {
+  0% {
+    background: linear-gradient(
+      135deg,
+      #ff6b6b,
+      #feca57,
+      #48dbfb,
+      #a29bfe,
+      #ff6b6b
+    );
+    background-size: 400% 400%;
+  }
+  20% {
+    background: linear-gradient(
+      135deg,
+      #feca57,
+      #48dbfb,
+      #a29bfe,
+      #ff6b6b,
+      #feca57
+    );
+    background-size: 400% 400%;
+  }
+  40% {
+    background: linear-gradient(
+      135deg,
+      #48dbfb,
+      #a29bfe,
+      #ff6b6b,
+      #feca57,
+      #48dbfb
+    );
+    background-size: 400% 400%;
+  }
+  60% {
+    background: linear-gradient(
+      135deg,
+      #a29bfe,
+      #ff6b6b,
+      #feca57,
+      #48dbfb,
+      #a29bfe
+    );
+    background-size: 400% 400%;
+  }
+  80% {
+    background: linear-gradient(
+      135deg,
+      #fd79a8,
+      #feca57,
+      #55efc4,
+      #74b9ff,
+      #fd79a8
+    );
+    background-size: 400% 400%;
+  }
+  100% {
+    background: linear-gradient(
+      135deg,
+      #55efc4,
+      #74b9ff,
+      #fd79a8,
+      #feca57,
+      #55efc4
+    );
+    background-size: 400% 400%;
+  }
+}
+
+.wrapper {
+  display: flex;
+  gap: 20px;
+  max-width: 1400px;
+  width: 100%;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== منوی کناری ===== */
+.sidebar {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 18px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 170px;
+  max-width: 190px;
+  position: sticky;
+  top: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar h3 {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+  margin-bottom: 2px;
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sidebar-item.active {
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+}
+
+.sidebar-item .icon {
+  font-size: 1rem;
+  width: 24px;
+  text-align: center;
+}
+
+.sidebar-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.container {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 20px 24px 24px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-height: 96vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.container::-webkit-scrollbar {
+  width: 5px;
+}
+.container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+}
+.container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+#menu {
+  text-align: center;
+}
+
+#menu h1 {
+  color: #fff;
+  font-size: 2.6rem;
+  text-shadow:
+    0 0 40px rgba(255, 215, 0, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.3);
+  margin-bottom: 22px;
+  letter-spacing: 3px;
+}
+
+.menu-group {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  scroll-margin-top: 10px;
+}
+
+.menu-group label {
+  display: block;
+  color: #eee;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#nameInput {
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 18px;
+  width: 80%;
+  max-width: 280px;
+  font-size: 1rem;
+  color: #fff;
+  outline: none;
+  text-align: center;
+  transition: 0.3s;
+}
+#nameInput:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+.color-picker {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.color-option {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: 0.25s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #fff;
+}
+
+.color-option.active {
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+/* ===== فروشگاه کلاه ===== */
+.hat-shop {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hat-shop-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.25s;
+  min-width: 80px;
+  position: relative;
+}
+
+.hat-shop-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.hat-shop-item.owned {
+  border-color: #2ecc71;
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.hat-shop-item.locked {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.hat-shop-item .hat-emoji {
+  font-size: 2rem;
+  display: block;
+}
+
+.hat-shop-item .hat-name {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: block;
+  margin-top: 4px;
+}
+
+.hat-shop-item .hat-price {
+  font-size: 0.7rem;
+  color: #ffd700;
+  display: block;
+  margin-top: 4px;
+}
+
+.hat-shop-item .hat-status {
+  font-size: 0.6rem;
+  display: block;
+  margin-top: 2px;
+}
+
+.hat-shop-item .hat-status.owned {
+  color: #2ecc71;
+}
+
+.hat-shop-item .hat-status.locked {
+  color: #e74c3c;
+}
+
+.hat-shop-item .hat-status.equipped {
+  color: #ffd700;
+  font-weight: 700;
+}
+
+.hat-shop-item.selected {
+  border-color: #ffd700;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+}
+
+.setting-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 70px;
+}
+
+.setting-item label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.setting-item select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 7px 10px;
+  color: #fff;
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  min-width: 70px;
+  max-width: 110px;
+}
+.setting-item select option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.music-upload {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.music-upload input[type="file"] {
+  display: none;
+}
+
+.music-upload label {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 9px 20px;
+  color: #eee;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.music-upload label:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.music-status {
+  color: #2ecc71;
+  font-size: 0.8rem;
+}
+.music-status.no-music {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#playBtn {
+  background: linear-gradient(135deg, #ffd700, #f39c12);
+  border: none;
+  border-radius: 50px;
+  padding: 16px 50px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 8px 35px rgba(255, 215, 0, 0.2);
+  width: 100%;
+  max-width: 280px;
+  letter-spacing: 1.5px;
+}
+#playBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 50px rgba(255, 215, 0, 0.35);
+}
+#playBtn:active {
+  transform: scale(0.96);
+}
+
+/* ===== صفحه بازی ===== */
+#gameScreen {
+  display: none;
+  text-align: center;
+}
+
+#gameHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  flex-wrap: wrap;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+#gameHeader span {
+  color: #ffd700;
+}
+#portalStatus {
+  color: #a29bfe;
+  font-weight: 700;
+}
+
+/* ===== نمایش سکه و قلب در بالای صفحه (جای هدر) ===== */
+.top-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+}
+
+.top-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.top-stats .stat-item .emoji {
+  font-size: 1.5rem;
+}
+
+.top-stats .stat-item .value {
+  color: #ffd700;
+  font-size: 1.3rem;
+}
+
+.top-stats .stat-item .value.coins {
+  color: #ffd700;
+}
+
+.top-stats .stat-item .hearts {
+  display: flex;
+  gap: 4px;
+  font-size: 1.4rem;
+}
+
+.top-stats .stat-item .hearts .heart {
+  transition: 0.3s;
+}
+
+.top-stats .stat-item .hearts .heart.lost {
+  filter: grayscale(1);
+  opacity: 0.3;
+  transform: scale(0.8);
+}
+
+#gameCanvas {
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1/1;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 60px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(4px);
+}
+
+.music-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.music-controls button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px 14px;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.music-controls button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.music-controls .volume-slider {
+  width: 80px;
+  accent-color: #ffd700;
+  cursor: pointer;
+}
+
+.controls-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 200px;
+}
+
+.ctrl-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 1.7rem;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.1s;
+  backdrop-filter: blur(4px);
+}
+.ctrl-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.92);
+}
+.ctrl-btn.empty {
+  background: transparent;
+  border: none;
+  pointer-events: none;
+}
+
+.speed-btn {
+  background: linear-gradient(135deg, #ffd700, #f39c12);
+  border: none;
+  border-radius: 16px;
+  padding: 14px 18px;
+  color: #1a1a2e;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+  min-width: 70px;
+  text-align: center;
+}
+.speed-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 30px rgba(255, 215, 0, 0.25);
+}
+.speed-btn:active {
+  transform: scale(0.95);
+}
+.speed-btn .speed-label {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+#gameOver {
+  display: none;
+  text-align: center;
+  padding: 40px 15px;
+}
+#gameOver .icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 4px;
+}
+#gameOver .icon.win {
+  color: #ffd700;
+}
+#gameOver .icon.lose {
+  color: #e74c3c;
+}
+#gameOver h2 {
+  font-size: 2.8rem;
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+}
+#gameOver h2.win {
+  color: #ffd700;
+}
+#gameOver h2.lose {
+  color: #e74c3c;
+}
+#gameOver .final-score {
+  color: #fff;
+  font-size: 1.4rem;
+  margin: 16px 0 26px;
+}
+#gameOver .final-score span {
+  color: #ffd700;
+  font-size: 2rem;
+}
+
+.btn-group {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-group button {
+  padding: 12px 34px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  color: #fff;
+}
+#restartBtn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+#menuBtn {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+}
+.btn-group button:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 850px) {
+  .wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .sidebar {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 70%;
+    max-width: 260px;
+    height: 100vh;
+    border-radius: 0;
+    z-index: 100;
+    padding: 30px 20px;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(30px);
+    overflow-y: auto;
+  }
+  .sidebar.visible {
+    display: block !important;
+  }
+  .sidebar-toggle {
+    display: block;
+  }
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 99;
+  }
+  .overlay.visible {
+    display: block;
+  }
+  .controls-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .speed-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+  .top-stats {
+    gap: 15px;
+    padding: 8px 12px;
+  }
+  .top-stats .stat-item {
+    font-size: 0.9rem;
+  }
+  .top-stats .stat-item .emoji {
+    font-size: 1.2rem;
+  }
+  .top-stats .stat-item .value {
+    font-size: 1.1rem;
+  }
+  .top-stats .stat-item .hearts {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .container {
+    padding: 14px 12px;
+  }
+  #menu h1 {
+    font-size: 2rem;
+  }
+  .color-option {
+    width: 28px;
+    height: 28px;
+    font-size: 0.6rem;
+  }
+  .hat-shop-item {
+    min-width: 60px;
+    padding: 8px 10px;
+  }
+  .hat-shop-item .hat-emoji {
+    font-size: 1.5rem;
+  }
+  #playBtn {
+    padding: 13px 24px;
+    font-size: 1.1rem;
+  }
+  .ctrl-btn {
+    padding: 10px;
+    font-size: 1.3rem;
+  }
+  .controls {
+    max-width: 150px;
+  }
+  .setting-item select {
+    min-width: 60px;
+    font-size: 0.7rem;
+    padding: 5px 6px;
+  }
+  #gameOver h2 {
+    font-size: 2rem;
+  }
+  #gameOver .icon {
+    font-size: 3rem;
+  }
+  .top-stats {
+    gap: 10px;
+    padding: 6px 10px;
+  }
+  .top-stats .stat-item {
+    font-size: 0.75rem;
+  }
+  .top-stats .stat-item .emoji {
+    font-size: 1rem;
+  }
+  .top-stats .stat-item .value {
+    font-size: 0.9rem;
+  }
+  .top-stats .stat-item .hearts {
+    font-size: 1rem;
+  }
+}
