@@ -38,115 +38,85 @@ const ALL_COLORS = [
 
 let selectedColor = ALL_COLORS[0];
 
-// ===== کلاه‌ها با قیمت =====
+// ===== کلاه‌ها (همه رایگان) =====
 const HAT_SHOP = [
   { id: "none", emoji: "🚫", name: "بدون کلاه", price: 0, default: true },
-  { id: "crown", emoji: "👑", name: "تاج", price: 500 },
-  { id: "tophat", emoji: "🎩", name: "کلاه رسمی", price: 300 },
-  { id: "cap", emoji: "🧢", name: "کلاه بیسبال", price: 150 },
-  { id: "graduation", emoji: "🎓", name: "فارغ‌التحصیلی", price: 400 },
-  { id: "summer", emoji: "👒", name: "کلاه تابستانی", price: 200 },
-  { id: "helmet", emoji: "⛑", name: "کلاه ایمنی", price: 350 },
+  { id: "crown", emoji: "👑", name: "تاج", price: 0 },
+  { id: "tophat", emoji: "🎩", name: "کلاه رسمی", price: 0 },
+  { id: "cap", emoji: "🧢", name: "کلاه بیسبال", price: 0 },
+  { id: "graduation", emoji: "🎓", name: "فارغ‌التحصیلی", price: 0 },
+  { id: "summer", emoji: "👒", name: "کلاه تابستانی", price: 0 },
+  { id: "helmet", emoji: "⛑", name: "کلاه ایمنی", price: 0 },
 ];
 
 let ownedHats = ["none"];
 let equippedHat = "none";
-let totalCoins = 0;
+let totalCoins = Infinity;
 
-// ===== سیستم قلب =====
-let maxLives = 3;
-let currentLives = 3;
+// ===== سیستم قلب (بینهایت) =====
+let maxLives = Infinity;
+let currentLives = Infinity;
 
 function resetLives() {
-  currentLives = maxLives;
+  currentLives = Infinity;
   updateHeartsDisplay();
 }
 
 function loseLife() {
-  currentLives--;
-  updateHeartsDisplay();
-  if (currentLives <= 0) {
-    return true; // Game Over
-  }
+  // هیچوقت تموم نمیشه
   return false;
 }
 
 function updateHeartsDisplay() {
   const container = document.getElementById("heartsDisplay");
   container.innerHTML = "";
-  for (let i = 0; i < maxLives; i++) {
+  // نمایش ۳ قلب با نشان بینهایت
+  for (let i = 0; i < 3; i++) {
     const span = document.createElement("span");
-    span.className = "heart" + (i >= currentLives ? " lost" : "");
+    span.className = "heart";
     span.textContent = "❤️";
     container.appendChild(span);
   }
+  // اضافه کردن نشان بینهایت
+  const badge = document.createElement("span");
+  badge.className = "infinite-badge";
+  badge.textContent = "∞";
+  badge.style.marginLeft = "4px";
+  badge.style.fontSize = "0.8rem";
+  container.appendChild(badge);
 }
 
-// ===== ساخت فروشگاه کلاه =====
+// ===== فروشگاه (همه رایگان) =====
 function buildHatShop() {
   const shop = document.getElementById("hatShop");
   shop.innerHTML = "";
-
   HAT_SHOP.forEach((hat) => {
     const div = document.createElement("div");
     div.className = "hat-shop-item";
-
-    const isOwned = ownedHats.includes(hat.id);
+    const isOwned = true; // همه مالکیت دارند
     const isEquipped = equippedHat === hat.id;
-    const isLocked = !isOwned && hat.price > 0;
-
-    if (isOwned) div.classList.add("owned");
-    if (isLocked) div.classList.add("locked");
+    div.classList.add("owned");
     if (isEquipped) div.classList.add("selected");
-
     div.innerHTML = `
                 <span class="hat-emoji">${hat.emoji}</span>
                 <span class="hat-name">${hat.name}</span>
-                <span class="hat-price">${hat.price > 0 ? "💵 " + hat.price : "رایگان"}</span>
-                <span class="hat-status ${isEquipped ? "equipped" : isOwned ? "owned" : "locked"}">
-                    ${isEquipped ? "✅ فعال" : isOwned ? "✔️ دارم" : "🔒 قفل"}
+                <span class="hat-price">💵 رایگان</span>
+                <span class="hat-status ${isEquipped ? "equipped" : "owned"}">
+                    ${isEquipped ? "✅ فعال" : "✔️ دارم"}
                 </span>
             `;
-
     div.addEventListener("click", function () {
-      if (isOwned) {
-        equippedHat = hat.id;
-        updateHatShop();
-        updateHatDisplay();
-      } else if (hat.price === 0) {
-        equippedHat = hat.id;
-        ownedHats.push(hat.id);
-        updateHatShop();
-        updateHatDisplay();
-      } else {
-        if (totalCoins >= hat.price) {
-          if (
-            confirm(
-              `آیا می‌خواهید کلاه "${hat.name}" را با ${hat.price} سکه بخرید؟`,
-            )
-          ) {
-            totalCoins -= hat.price;
-            ownedHats.push(hat.id);
-            equippedHat = hat.id;
-            updateCoinDisplay();
-            updateHatShop();
-            updateHatDisplay();
-          }
-        } else {
-          alert(
-            `سکه‌های کافی ندارید! نیاز به ${hat.price} سکه دارید. شما ${totalCoins} سکه دارید.`,
-          );
-        }
-      }
+      equippedHat = hat.id;
+      updateHatShop();
+      updateHatDisplay();
     });
-
     shop.appendChild(div);
   });
 }
 
 function updateHatShop() {
   buildHatShop();
-  document.getElementById("totalCoinsDisplay").textContent = totalCoins;
+  document.getElementById("totalCoinsDisplay").textContent = "∞";
 }
 
 function updateHatDisplay() {
@@ -155,30 +125,21 @@ function updateHatDisplay() {
 }
 
 function updateCoinDisplay() {
-  document.getElementById("scoreDisplay").textContent = totalCoins;
-  document.getElementById("totalCoinsDisplay").textContent = totalCoins;
+  document.getElementById("scoreDisplay").textContent = "∞";
+  document.getElementById("totalCoinsDisplay").textContent = "∞";
 }
 
-// ===== ذخیره و بازیابی =====
+// ===== ذخیره =====
 function saveProgress() {
   try {
-    localStorage.setItem("snakeCoins", totalCoins);
-    localStorage.setItem("snakeOwnedHats", JSON.stringify(ownedHats));
     localStorage.setItem("snakeEquippedHat", equippedHat);
-    localStorage.setItem("snakeLives", currentLives);
   } catch (e) {}
 }
 
 function loadProgress() {
   try {
-    const coins = localStorage.getItem("snakeCoins");
-    if (coins !== null) totalCoins = parseInt(coins);
-    const hats = localStorage.getItem("snakeOwnedHats");
-    if (hats) ownedHats = JSON.parse(hats);
     const eq = localStorage.getItem("snakeEquippedHat");
     if (eq) equippedHat = eq;
-    const lives = localStorage.getItem("snakeLives");
-    if (lives !== null) currentLives = parseInt(lives);
   } catch (e) {}
 }
 
@@ -366,7 +327,7 @@ function lightenColor(hex, percent) {
   return `#${((1 << 24) | (R << 16) | (G << 8) | B).toString(16).slice(1)}`;
 }
 
-// ===== ریستارت با جان =====
+// ===== ریستارت با جان (بینهایت) =====
 function respawnSnake() {
   state.gameRunning = false;
   if (state.gameLoop) {
@@ -431,7 +392,7 @@ function initGame() {
 }
 
 function updateScore() {
-  scoreDisplay.textContent = totalCoins;
+  scoreDisplay.textContent = "∞";
   updateCoinDisplay();
 }
 function updateFoodCount() {
@@ -918,8 +879,7 @@ function stepGame() {
       state.food.splice(fi, 1);
       ate = true;
       state.score++;
-      totalCoins += 10; // هر غذا = ۱۰ سکه
-      updateScore();
+      // سکه بینهایت، نیازی به اضافه کردن نیست
 
       if (state.score >= 100 && !state.portalActive) {
         state.portal = spawnPortal();
@@ -943,7 +903,7 @@ function stepGame() {
   drawGame();
 }
 
-// ===== مدیریت مرگ =====
+// ===== مدیریت مرگ (قلب بینهایت) =====
 function handleDeath() {
   if (state.respawning) return;
   state.respawning = true;
@@ -953,17 +913,10 @@ function handleDeath() {
     state.gameLoop = null;
   }
 
-  const gameOver = loseLife();
-  if (gameOver) {
-    endGame(false);
-    return;
-  }
-
-  // نمایش پیام کم شدن جان
-  const msg = `💔 یک قلب از دست دادی! (${currentLives} قلب باقی مونده)`;
+  // قلب بینهایت، هیچوقت تموم نمیشه
+  const msg = `💚 قلب‌های شما بینهایت است! ادامه دهید!`;
   alert(msg);
 
-  // ریستارت مار با همان سکه‌ها
   setTimeout(() => {
     respawnSnake();
   }, 300);
@@ -993,7 +946,7 @@ function endGame(won = false) {
     resultTitle.textContent = "Game Over";
   }
 
-  finalScoreEl.textContent = state.score;
+  finalScoreEl.textContent = "∞";
   saveProgress();
   gameScreenEl.style.display = "none";
   gameOverEl.style.display = "block";

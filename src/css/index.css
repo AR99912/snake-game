@@ -268,7 +268,7 @@ body {
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
 }
 
-/* ===== فروشگاه کلاه ===== */
+/* ===== فروشگاه کلاه (همه رایگان) ===== */
 .hat-shop {
   display: flex;
   justify-content: center;
@@ -298,11 +298,6 @@ body {
   background: rgba(46, 204, 113, 0.1);
 }
 
-.hat-shop-item.locked {
-  opacity: 0.6;
-  filter: grayscale(0.5);
-}
-
 .hat-shop-item .hat-emoji {
   font-size: 2rem;
   display: block;
@@ -330,10 +325,6 @@ body {
 
 .hat-shop-item .hat-status.owned {
   color: #2ecc71;
-}
-
-.hat-shop-item .hat-status.locked {
-  color: #e74c3c;
 }
 
 .hat-shop-item .hat-status.equipped {
@@ -449,30 +440,7 @@ body {
   text-align: center;
 }
 
-#gameHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 18px;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 14px;
-  margin-bottom: 14px;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  flex-wrap: wrap;
-  gap: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-#gameHeader span {
-  color: #ffd700;
-}
-#portalStatus {
-  color: #a29bfe;
-  font-weight: 700;
-}
-
-/* ===== نمایش سکه و قلب در بالای صفحه (جای هدر) ===== */
+/* ===== نمایش سکه و قلب در بالای صفحه ===== */
 .top-stats {
   display: flex;
   justify-content: center;
@@ -518,10 +486,15 @@ body {
   transition: 0.3s;
 }
 
-.top-stats .stat-item .hearts .heart.lost {
-  filter: grayscale(1);
-  opacity: 0.3;
-  transform: scale(0.8);
+/* بینهایت */
+.infinite-badge {
+  background: linear-gradient(135deg, #ffd700, #f39c12);
+  color: #1a1a2e;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-left: 4px;
 }
 
 #gameCanvas {
